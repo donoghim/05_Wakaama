@@ -1,0 +1,19 @@
+# pack-refs with: peeled fully-peeled sorted 
+0e865aae7cb83f094b868660a9b8552039a5cca1 refs/remotes/origin/develop
+64338599c201e0c567b2c5b09bdc684c942df10c refs/remotes/origin/develop_archive
+55642626dab50669c0f226bb3d3eb80f0bbb1f14 refs/remotes/origin/drop-unlink-argument
+7f4feea57bfee5be1d9e7d907765beea93526791 refs/remotes/origin/feature/connection_id
+94205ffb70885fb0929896af709514896d885997 refs/remotes/origin/feature/handshake_fragmentation
+ba5993a05f020173525aabd1423ea70e4107a4a1 refs/remotes/origin/fix-ClientHello-max-length
+e7bacd31b2ff1a20819890e2e59e2d32af638306 refs/remotes/origin/fix-asn1_len
+7bdce7f15844af30ed72799d8251217f4bdf2eed refs/remotes/origin/fix-peer_release
+0e865aae7cb83f094b868660a9b8552039a5cca1 refs/remotes/origin/main
+0538a50a0d6b89f471be5dfd807fa8e2e8ee1538 refs/remotes/origin/remove-string.h-from-header-files
+e213cb650123179cb9848a4ac5a11f716d758c64 refs/remotes/origin/replace-gnu_source-with-posix
+b1ebfc63212c9199c9085fe4d594dc4f694a5f14 refs/remotes/origin/split-dtls_time
+b18e24726543fe56206e99094581e7a91fd1e92d refs/tags/_old/release-0.8.1
+^7d039c28139fa30c1feb9aaf1979d3d80bf175e5
+9381d38003db631c6dd42e681d0598b37dfc31e5 refs/tags/_old/release-0.8.2
+^ded031bc0642875daa47946d10e974318a5c95c4
+e1388b3980cbf501c03a6090ab382e080074944c refs/tags/initial_contribution
+dad634471a8ff125b1b00d4e8141ddd5055eb8ef refs/tags/v0.9-rc1

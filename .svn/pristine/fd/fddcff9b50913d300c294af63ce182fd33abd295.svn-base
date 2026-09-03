@@ -1,0 +1,56 @@
+# The set of languages for which implicit dependencies are needed:
+set(CMAKE_DEPENDS_LANGUAGES
+  "C"
+  )
+# The set of files for implicit dependencies of each language:
+set(CMAKE_DEPENDS_CHECK_C
+  "/home/young/work/00_svn/05_Wakaama/05_server/coap/block.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/coap/block.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/coap/er-coap-13/er-coap-13.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/coap/er-coap-13/er-coap-13.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/coap/transaction.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/coap/transaction.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/bootstrap.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/bootstrap.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/discover.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/discover.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/liblwm2m.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/liblwm2m.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/list.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/list.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/management.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/management.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/objects.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/objects.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/observe.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/observe.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/packet.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/packet.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/registration.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/registration.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/uri.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/uri.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/core/utils.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/core/utils.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/data/cbor.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/data/cbor.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/data/data.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/data/data.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/data/json.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/data/json.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/data/json_common.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/data/json_common.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/data/senml_cbor.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/data/senml_cbor.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/data/senml_common.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/data/senml_common.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/data/senml_json.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/data/senml_json.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/data/tlv.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/data/tlv.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/examples/shared/commandline.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/examples/shared/commandline.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/examples/shared/connection.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/examples/shared/connection.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/examples/shared/platform.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/05_server/examples/shared/platform.c.o"
+  "/home/young/work/00_svn/05_Wakaama/05_server/examples/server/lwm2mserver.c" "/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir/lwm2mserver.c.o"
+  )
+set(CMAKE_C_COMPILER_ID "GNU")
+
+# Preprocessor definitions for this target.
+set(CMAKE_TARGET_DEFINITIONS_C
+  "LWM2M_COAP_DEFAULT_BLOCK_SIZE=1024"
+  "LWM2M_LITTLE_ENDIAN"
+  "LWM2M_SERVER_MODE"
+  )
+
+# The include file search paths:
+set(CMAKE_C_TARGET_INCLUDE_PATH
+  "05_server/include"
+  "05_server/core"
+  "05_server/coap"
+  "05_server/examples/shared"
+  )
+
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
+  )
+
+# Fortran module output directory.
+set(CMAKE_Fortran_TARGET_MODULE_DIR "")

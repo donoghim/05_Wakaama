@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/CMakeFiles/external_tinydtls"
+		},
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/CMakeFiles/external_tinydtls.rule"
+		},
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/CMakeFiles/external_tinydtls-complete.rule"
+		},
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-install.rule"
+		},
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-mkdir.rule"
+		},
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-download.rule"
+		},
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-update.rule"
+		},
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-patch.rule"
+		},
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-configure.rule"
+		},
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-build.rule"
+		},
+		{
+			"file" : "/home/young/work/00_svn/05_Wakaama/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-autoheader.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"external_tinydtls"
+		],
+		"name" : "external_tinydtls"
+	}
+}

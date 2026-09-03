@@ -1,0 +1,35 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/lwm2mserver.dir/coap/block.c.o"
+  "CMakeFiles/lwm2mserver.dir/coap/er-coap-13/er-coap-13.c.o"
+  "CMakeFiles/lwm2mserver.dir/coap/transaction.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/bootstrap.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/discover.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/liblwm2m.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/list.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/management.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/objects.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/observe.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/packet.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/registration.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/uri.c.o"
+  "CMakeFiles/lwm2mserver.dir/core/utils.c.o"
+  "CMakeFiles/lwm2mserver.dir/data/cbor.c.o"
+  "CMakeFiles/lwm2mserver.dir/data/data.c.o"
+  "CMakeFiles/lwm2mserver.dir/data/json.c.o"
+  "CMakeFiles/lwm2mserver.dir/data/json_common.c.o"
+  "CMakeFiles/lwm2mserver.dir/data/senml_cbor.c.o"
+  "CMakeFiles/lwm2mserver.dir/data/senml_common.c.o"
+  "CMakeFiles/lwm2mserver.dir/data/senml_json.c.o"
+  "CMakeFiles/lwm2mserver.dir/data/tlv.c.o"
+  "CMakeFiles/lwm2mserver.dir/examples/shared/commandline.c.o"
+  "CMakeFiles/lwm2mserver.dir/examples/shared/connection.c.o"
+  "CMakeFiles/lwm2mserver.dir/examples/shared/platform.c.o"
+  "CMakeFiles/lwm2mserver.dir/lwm2mserver.c.o"
+  "lwm2mserver"
+  "lwm2mserver.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang C)
+  include(CMakeFiles/lwm2mserver.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

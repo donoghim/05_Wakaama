@@ -1,0 +1,49 @@
+
+# Consider dependencies only in project.
+set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
+
+# The set of languages for which implicit dependencies are needed:
+set(CMAKE_DEPENDS_LANGUAGES
+  )
+
+# The set of dependency files which are needed:
+set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/examples/bootstrap_server/bootstrap_info.c" "CMakeFiles/bootstrap_server.dir/bootstrap_info.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/bootstrap_info.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/examples/bootstrap_server/bootstrap_server.c" "CMakeFiles/bootstrap_server.dir/bootstrap_server.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/bootstrap_server.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/coap/block.c" "CMakeFiles/bootstrap_server.dir/coap/block.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/coap/block.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/coap/er-coap-13/er-coap-13.c" "CMakeFiles/bootstrap_server.dir/coap/er-coap-13/er-coap-13.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/coap/er-coap-13/er-coap-13.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/coap/transaction.c" "CMakeFiles/bootstrap_server.dir/coap/transaction.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/coap/transaction.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/bootstrap.c" "CMakeFiles/bootstrap_server.dir/core/bootstrap.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/bootstrap.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/discover.c" "CMakeFiles/bootstrap_server.dir/core/discover.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/discover.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/liblwm2m.c" "CMakeFiles/bootstrap_server.dir/core/liblwm2m.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/liblwm2m.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/list.c" "CMakeFiles/bootstrap_server.dir/core/list.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/list.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/management.c" "CMakeFiles/bootstrap_server.dir/core/management.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/management.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/objects.c" "CMakeFiles/bootstrap_server.dir/core/objects.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/objects.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/observe.c" "CMakeFiles/bootstrap_server.dir/core/observe.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/observe.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/packet.c" "CMakeFiles/bootstrap_server.dir/core/packet.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/packet.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/registration.c" "CMakeFiles/bootstrap_server.dir/core/registration.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/registration.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/uri.c" "CMakeFiles/bootstrap_server.dir/core/uri.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/uri.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/core/utils.c" "CMakeFiles/bootstrap_server.dir/core/utils.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/core/utils.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/data/cbor.c" "CMakeFiles/bootstrap_server.dir/data/cbor.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/data/cbor.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/data/data.c" "CMakeFiles/bootstrap_server.dir/data/data.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/data/data.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/data/json.c" "CMakeFiles/bootstrap_server.dir/data/json.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/data/json.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/data/json_common.c" "CMakeFiles/bootstrap_server.dir/data/json_common.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/data/json_common.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/data/senml_cbor.c" "CMakeFiles/bootstrap_server.dir/data/senml_cbor.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/data/senml_cbor.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/data/senml_common.c" "CMakeFiles/bootstrap_server.dir/data/senml_common.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/data/senml_common.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/data/senml_json.c" "CMakeFiles/bootstrap_server.dir/data/senml_json.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/data/senml_json.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/data/tlv.c" "CMakeFiles/bootstrap_server.dir/data/tlv.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/data/tlv.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/examples/shared/commandline.c" "CMakeFiles/bootstrap_server.dir/examples/shared/commandline.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/examples/shared/commandline.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/examples/shared/connection.c" "CMakeFiles/bootstrap_server.dir/examples/shared/connection.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/examples/shared/connection.c.o.d"
+  "/home/young/work/00_svn/05_Wakaama/02_bs_server/examples/shared/platform.c" "CMakeFiles/bootstrap_server.dir/examples/shared/platform.c.o" "gcc" "CMakeFiles/bootstrap_server.dir/examples/shared/platform.c.o.d"
+  )
+
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
+  )
+
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
+  )
+
+# Fortran module output directory.
+set(CMAKE_Fortran_TARGET_MODULE_DIR "")

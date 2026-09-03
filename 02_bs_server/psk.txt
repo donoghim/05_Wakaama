@@ -1,0 +1,19 @@
++QLWEPNS: ASN_CSE-D-548818ac83-QUEC
+
+# from Wakaama source -----------------
+# 4f75724964656e74697479
+public = 34663735373234393634363536653734363937343739
+secret = 4F7572536563726574
+
+# from BC95-GV COAPS manual --------------
+# 869154040004132
+public = 383639313534303430303034313332
+secret = 46694a6871617a3062706d68454c6e4c
+
+# from psktool generation --------------
+# psk_identity_a
+public = 70736b5f6964656e746974795f61
+secret = e6cfc6dac1eb6e73ffa117b1bc68a3e1685a5c6722725a4c13431624f0a675c7
+
+// wireshark filter ----------------
+(udp.port==22001) || (udp.port==22002) || (udp.port==5683) || (udp.port==5864) || dtls

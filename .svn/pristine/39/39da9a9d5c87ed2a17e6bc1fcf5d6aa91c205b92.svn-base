@@ -1,0 +1,14 @@
+# Target labels
+ external_tinydtls
+# Source files and their labels
+/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/external_tinydtls
+/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/external_tinydtls.rule
+/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/external_tinydtls-complete.rule
+/home/young/work/01_lwm2m_waka/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-install.rule
+/home/young/work/01_lwm2m_waka/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-mkdir.rule
+/home/young/work/01_lwm2m_waka/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-download.rule
+/home/young/work/01_lwm2m_waka/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-update.rule
+/home/young/work/01_lwm2m_waka/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-patch.rule
+/home/young/work/01_lwm2m_waka/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-configure.rule
+/home/young/work/01_lwm2m_waka/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-build.rule
+/home/young/work/01_lwm2m_waka/03_client/external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-autoheader.rule

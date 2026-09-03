@@ -1,0 +1,16 @@
+Build guide
+young@vm:~/work/00_svn/05_Wakaama/03_client$ make clean
+young@vm:~/work/00_svn/05_Wakaama/03_client$ rm CMakeCache.txt
+young@vm:~/work/00_svn/05_Wakaama/03_client$ cmake ./examples/client
+young@vm:~/work/00_svn/05_Wakaama/03_client$ make
+
+young@vm:~/work/00_svn/05_Wakaama/02_bs_server$ make clean
+young@vm:~/work/00_svn/05_Wakaama/02_bs_server$ rm CMakeCache.txt
+young@vm:~/work/00_svn/05_Wakaama/02_bs_server$ cmake ./examples/bootstrap_server
+young@vm:~/work/00_svn/05_Wakaama/02_bs_server$ make
+
+young@vm:~/work/00_svn/05_Wakaama/05_server$ rm CMakeCache.txt
+young@vm:~/work/00_svn/05_Wakaama/05_server$ make clean
+young@vm:~/work/00_svn/05_Wakaama/05_server$ cmake ./examples/server
+young@vm:~/work/00_svn/05_Wakaama/05_server$ make
+

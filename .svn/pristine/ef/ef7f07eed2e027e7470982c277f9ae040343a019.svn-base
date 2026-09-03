@@ -1,0 +1,2 @@
+echo "----- start LWM2M server"
+./lwm2mserver -4 -l 22002

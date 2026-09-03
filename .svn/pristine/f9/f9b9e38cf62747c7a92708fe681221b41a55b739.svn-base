@@ -1,0 +1,17 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/external_tinydtls"
+  "CMakeFiles/external_tinydtls-complete"
+  "external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-autoheader"
+  "external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-build"
+  "external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-configure"
+  "external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-download"
+  "external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-install"
+  "external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-mkdir"
+  "external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-patch"
+  "external_tinydtls-prefix/src/external_tinydtls-stamp/external_tinydtls-update"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang )
+  include(CMakeFiles/external_tinydtls.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

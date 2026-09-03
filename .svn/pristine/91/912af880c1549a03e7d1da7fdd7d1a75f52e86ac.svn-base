@@ -1,0 +1,16 @@
+# pack-refs with: peeled fully-peeled sorted 
+4214340ebbfd1f4036f19e7e619bfbaec9f1805a refs/remotes/origin/EPL_update
+3e75833c6b5880cb4d9b38e66c3908792ed6e20d refs/remotes/origin/IPSO
+73b21217fd9d9373797089e254d58535ca55a7e1 refs/remotes/origin/_old/master
+5c15b8630770dcacf9cf371160307aad86714444 refs/remotes/origin/bootstrap
+852e31365bbec96e5c44183824bf4ac100b30341 refs/remotes/origin/fix_378
+311d75499c7315e53e15b48f7880f5f7b1782b43 refs/remotes/origin/fix_json
+d2812aecc62e8b01cbd91e783b214541e143720d refs/remotes/origin/gardena/rs/fix-sonarcloud-scan
+ec4609e0d796ace2f15191d3a48edbd527b568c3 refs/remotes/origin/main
+75ec4ec8298a4c47ab9a5253ac374ad6628f894f refs/remotes/origin/new_instance_list
+5b487a6d9db51cb446dd1947c526686b6e281b66 refs/remotes/origin/reorg_code
+c5dd9115a84729446d2feaa2c10a343b12c3ded8 refs/remotes/origin/tcp
+73b21217fd9d9373797089e254d58535ca55a7e1 refs/tags/_old/eclipse_initial
+a78290755fb0467820b83512671536b6c4ddbd4e refs/tags/snapshots/2022-08-03
+11662338212a8eb36353f42341e9b5d312c90255 refs/tags/snapshots/2023-03-31
+da74b3c91570b9716fbb424e90935806b2b29814 refs/tags/v1.0

@@ -1,0 +1,68 @@
+# The set of languages for which implicit dependencies are needed:
+set(CMAKE_DEPENDS_LANGUAGES
+  "C"
+  )
+# The set of files for implicit dependencies of each language:
+set(CMAKE_DEPENDS_CHECK_C
+  "/home/young/work/01_lwm2m_waka/03_client/coap/block.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/coap/block.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/coap/er-coap-13/er-coap-13.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/coap/er-coap-13/er-coap-13.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/coap/transaction.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/coap/transaction.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/bootstrap.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/bootstrap.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/discover.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/discover.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/liblwm2m.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/liblwm2m.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/list.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/list.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/management.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/management.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/objects.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/objects.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/observe.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/observe.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/packet.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/packet.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/registration.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/registration.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/uri.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/uri.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/core/utils.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/core/utils.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/data/cbor.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/data/cbor.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/data/data.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/data/data.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/data/json.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/data/json.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/data/json_common.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/data/json_common.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/data/senml_cbor.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/data/senml_cbor.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/data/senml_common.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/data/senml_common.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/data/senml_json.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/data/senml_json.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/data/tlv.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/data/tlv.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/shared/commandline.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/examples/shared/commandline.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/shared/connection.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/examples/shared/connection.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/shared/platform.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/examples/shared/platform.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/lwm2mclient.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/lwm2mclient.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/object_access_control.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/object_access_control.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/object_connectivity_moni.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/object_connectivity_moni.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/object_connectivity_stat.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/object_connectivity_stat.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/object_device.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/object_device.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/object_firmware.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/object_firmware.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/object_location.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/object_location.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/object_security.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/object_security.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/object_server.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/object_server.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/object_test.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/object_test.c.o"
+  "/home/young/work/01_lwm2m_waka/03_client/examples/client/system_api.c" "/home/young/work/01_lwm2m_waka/03_client/CMakeFiles/lwm2mclient.dir/system_api.c.o"
+  )
+set(CMAKE_C_COMPILER_ID "GNU")
+
+# Preprocessor definitions for this target.
+set(CMAKE_TARGET_DEFINITIONS_C
+  "LWM2M_BOOTSTRAP"
+  "LWM2M_CLIENT_MODE"
+  "LWM2M_COAP_DEFAULT_BLOCK_SIZE=1024"
+  "LWM2M_LITTLE_ENDIAN"
+  "LWM2M_SUPPORT_SENML_JSON"
+  )
+
+# The include file search paths:
+set(CMAKE_C_TARGET_INCLUDE_PATH
+  "include"
+  "core"
+  "coap"
+  "examples/shared"
+  )
+
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
+  )
+
+# Fortran module output directory.
+set(CMAKE_Fortran_TARGET_MODULE_DIR "")
