@@ -1,3 +1,0 @@
-/home/quectel/Wakaama/05_Wakaama/07_sender/build/CMakeFiles/rebuild_cache.dir
-/home/quectel/Wakaama/05_Wakaama/07_sender/build/CMakeFiles/edit_cache.dir
-/home/quectel/Wakaama/05_Wakaama/07_sender/build/CMakeFiles/sender.dir
