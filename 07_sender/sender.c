@@ -186,7 +186,13 @@ int main(int argc, char *argv[])
         }
         if (verbose)
         {
-            printf("queued: client=%" PRIu16 " uri=%s data=%s\n", client_id, uri, value);
+            //printf("queued: client=%" PRIu16 " uri=%s data=%s\n", client_id, uri, value);
+            // 읽기 쉬운 시간을 로그 앞에 붙여 출력
+            time_t now = time(NULL);
+            struct tm *tm_info = localtime(&now);
+            char time_str[26];
+            strftime(time_str, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+            printf("[%s] queued: client=%" PRIu16 " uri=%s data=%s\n", time_str, client_id, uri, value);
         }
 
         if (count != 0 && sent + 1 == count)
