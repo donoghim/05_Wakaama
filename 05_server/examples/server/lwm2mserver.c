@@ -73,6 +73,8 @@
 #include <inttypes.h>
 #include <termios.h>
 
+#include "er-coap-13/er-coap-13.h"
+
 #include "commandline.h"
 #include "connection.h"
 
@@ -80,6 +82,25 @@
 #define PRV_CMDLINE_MAX_LEN 512
 #define PRV_CMDLINE_HISTORY_MAX 32
 #define PRV_CONTROL_SOCKET_DEFAULT "/tmp/lwm2mserver-control.sock"
+#define PRV_DFOTA_FW_ROOT_DEFAULT "dfota_fw"
+#define PRV_DFOTA_URI_PREFIX_DEFAULT "/dfota_fw"
+#define PRV_DFOTA_HOST_DEFAULT "115.90.109.11"
+
+static const char * g_dfotaFwRoot = PRV_DFOTA_FW_ROOT_DEFAULT;
+static const char * g_dfotaUriPrefix = PRV_DFOTA_URI_PREFIX_DEFAULT;
+static const char * g_dfotaHost = PRV_DFOTA_HOST_DEFAULT;
+static const char * g_localPort = LWM2M_STANDARD_PORT_STR;
+
+typedef enum
+{
+    PRV_DFOTA_IDLE,
+    PRV_DFOTA_WAIT_DOWNLOAD,
+    PRV_DFOTA_WAIT_RESULT,
+    PRV_DFOTA_WAIT_EXECUTE
+} prv_dfota_state_t;
+
+static prv_dfota_state_t g_dfotaState = PRV_DFOTA_IDLE;
+static uint16_t g_dfotaClientId = LWM2M_MAX_ID;
 
 static int g_quit = 0;
 static struct termios g_old_termios;
@@ -483,12 +504,49 @@ static void prv_printUri(const lwm2m_uri_t * uriP)
 #endif
 }
 
+static bool prv_uri_is_resource(lwm2m_uri_t * uriP,
+                                uint16_t objectId,
+                                uint16_t instanceId,
+                                uint16_t resourceId)
+{
+    return uriP != NULL
+        && LWM2M_URI_IS_SET_OBJECT(uriP)
+        && LWM2M_URI_IS_SET_INSTANCE(uriP)
+        && LWM2M_URI_IS_SET_RESOURCE(uriP)
+        && uriP->objectId == objectId
+        && uriP->instanceId == instanceId
+        && uriP->resourceId == resourceId;
+}
+
+static bool prv_decode_single_byte_resource(uint8_t * data,
+                                            size_t dataLength,
+                                            uint16_t resourceId,
+                                            uint8_t * value)
+{
+    if (data == NULL || value == NULL)
+    {
+        return false;
+    }
+    if (dataLength == 1)
+    {
+        *value = data[0];
+        return true;
+    }
+    if (dataLength == 3 && data[0] == 0xC1 && data[1] == resourceId)
+    {
+        *value = data[2];
+        return true;
+    }
+
+    return false;
+}
+
 static void prv_result_callback(lwm2m_context_t *contextP, uint16_t clientID, lwm2m_uri_t *uriP, int status,
                                 block_info_t *block_info, lwm2m_media_type_t format, uint8_t *data, size_t dataLength,
                                 void *userData) {
     /* unused parameters */
-    (void)contextP;
     (void)userData;
+    (void)format;
 
     fprintf(stdout, "\r\nClient #%d ", clientID);
     prv_printUri(uriP);
@@ -498,6 +556,47 @@ static void prv_result_callback(lwm2m_context_t *contextP, uint16_t clientID, lw
 
     output_data(stdout, block_info, format, data, dataLength, 1);
 
+    if (g_dfotaState == PRV_DFOTA_WAIT_RESULT
+     && clientID == g_dfotaClientId
+     && status == COAP_205_CONTENT
+     && prv_uri_is_resource(uriP, 5, 0, 5))
+    {
+        uint8_t updateResult;
+
+        if (prv_decode_single_byte_resource(data, dataLength, 5, &updateResult) && updateResult == 0)
+        {
+            lwm2m_uri_t updateUri;
+            int result;
+
+            result = lwm2m_stringToUri("/5/0/2", strlen("/5/0/2"), &updateUri);
+            if (result != 0)
+            {
+                fprintf(stdout, "\r\nDFOTA result is 0, executing /5/0/2.\r\n");
+                result = lwm2m_dm_execute(contextP, clientID, &updateUri, 0, NULL, 0, prv_result_callback, NULL);
+                if (result == 0)
+                {
+                    g_dfotaState = PRV_DFOTA_WAIT_EXECUTE;
+                }
+                else
+                {
+                    prv_print_error(result);
+                    g_dfotaState = PRV_DFOTA_IDLE;
+                }
+            }
+        }
+        else
+        {
+            fprintf(stdout, "\r\nDFOTA update result is not 0; execute skipped.\r\n");
+            g_dfotaState = PRV_DFOTA_IDLE;
+        }
+    }
+    else if (g_dfotaState == PRV_DFOTA_WAIT_EXECUTE
+          && clientID == g_dfotaClientId
+          && prv_uri_is_resource(uriP, 5, 0, 2))
+    {
+        g_dfotaState = PRV_DFOTA_IDLE;
+    }
+
     fprintf(stdout, "\r\n> ");
     fflush(stdout);
 }
@@ -506,14 +605,43 @@ static void prv_notify_callback(lwm2m_context_t *contextP, uint16_t clientID, lw
                                 block_info_t *block_info, lwm2m_media_type_t format, uint8_t *data, size_t dataLength,
                                 void *userData) {
     /* unused parameters */
-    (void)contextP;
     (void)userData;
+    (void)format;
 
     fprintf(stdout, "\r\nNotify from client #%d ", clientID);
     prv_printUri(uriP);
     fprintf(stdout, " number %d\r\n", count);
 
     output_data(stdout, block_info, format, data, dataLength, 1);
+
+    if (g_dfotaState == PRV_DFOTA_WAIT_DOWNLOAD
+     && clientID == g_dfotaClientId
+     && prv_uri_is_resource(uriP, 5, 0, 3))
+    {
+        uint8_t firmwareState;
+
+        if (prv_decode_single_byte_resource(data, dataLength, 3, &firmwareState) && firmwareState == 2)
+        {
+            lwm2m_uri_t resultUri;
+            int result;
+
+            result = lwm2m_stringToUri("/5/0/5", strlen("/5/0/5"), &resultUri);
+            if (result != 0)
+            {
+                fprintf(stdout, "\r\nDFOTA download completed, reading /5/0/5.\r\n");
+                result = lwm2m_dm_read(contextP, clientID, &resultUri, prv_result_callback, NULL);
+                if (result == 0)
+                {
+                    g_dfotaState = PRV_DFOTA_WAIT_RESULT;
+                }
+                else
+                {
+                    prv_print_error(result);
+                    g_dfotaState = PRV_DFOTA_IDLE;
+                }
+            }
+        }
+    }
 
     fprintf(stdout, "\r\n> ");
     fflush(stdout);
@@ -727,6 +855,247 @@ static void prv_write_client(lwm2m_context_t * lwm2mH,
     (void)user_data;
 
     prv_do_write_client(buffer, lwm2mH, false);
+}
+
+static void prv_dfota_client(lwm2m_context_t * lwm2mH,
+                             char * buffer,
+                             void * user_data)
+{
+    uint16_t clientId;
+    lwm2m_uri_t uri;
+    char * end = NULL;
+    char packageUri[PRV_CMDLINE_MAX_LEN];
+    char command[PRV_CMDLINE_MAX_LEN];
+    int result;
+
+    /* unused parameter */
+    (void)user_data;
+
+    result = prv_read_id(buffer, &clientId);
+    if (result != 1) goto syntax_error;
+
+    buffer = get_next_arg(buffer, &end);
+    if (buffer[0] == 0 || strchr(buffer, '/') != NULL || strstr(buffer, "..") != NULL) goto syntax_error;
+    if (!check_end_of_args(end)) goto syntax_error;
+
+    result = snprintf(packageUri,
+                      sizeof(packageUri),
+                      "coap://%s:%s%s/%s",
+                      g_dfotaHost,
+                      g_localPort,
+                      g_dfotaUriPrefix,
+                      buffer);
+    if (result < 0 || result >= (int)sizeof(packageUri))
+    {
+        fprintf(stdout, "Package URI too long !");
+        return;
+    }
+
+    result = lwm2m_stringToUri("/5/0/3", strlen("/5/0/3"), &uri);
+    if (result == 0) goto syntax_error;
+
+    result = lwm2m_observe(lwm2mH, clientId, &uri, prv_notify_callback, NULL);
+    if (result != 0)
+    {
+        prv_print_error(result);
+        return;
+    }
+
+    result = snprintf(command, sizeof(command), "%u /5/0/1 %s", clientId, packageUri);
+    if (result < 0 || result >= (int)sizeof(command))
+    {
+        fprintf(stdout, "Command too long !");
+        return;
+    }
+
+    fprintf(stdout, "Package URI: %s\r\n", packageUri);
+    g_dfotaClientId = clientId;
+    g_dfotaState = PRV_DFOTA_WAIT_DOWNLOAD;
+    prv_do_write_client(command, lwm2mH, false);
+    return;
+
+syntax_error:
+    fprintf(stdout, "Syntax error !");
+}
+
+static int prv_send_dfota_response(connection_t * connP,
+                                   coap_packet_t * request,
+                                   uint8_t code,
+                                   uint32_t blockNum,
+                                   uint8_t more,
+                                   uint16_t blockSize,
+                                   const uint8_t * payload,
+                                   size_t payloadLen)
+{
+    coap_packet_t response[1];
+    uint8_t buffer[MAX_PACKET_SIZE];
+    size_t length;
+
+    if (request->type == COAP_TYPE_CON)
+    {
+        coap_init_message(response, COAP_TYPE_ACK, code, request->mid);
+    }
+    else
+    {
+        coap_init_message(response, COAP_TYPE_NON, code, coap_get_mid());
+    }
+
+    if (request->token_len != 0)
+    {
+        coap_set_header_token(response, request->token, request->token_len);
+    }
+
+    if (code == COAP_205_CONTENT)
+    {
+        coap_set_header_content_type(response, APPLICATION_OCTET_STREAM);
+        coap_set_header_block2(response, blockNum, more, blockSize);
+    }
+    coap_set_payload(response, payload, payloadLen);
+
+    length = coap_serialize_message(response, buffer);
+    if (length == 0)
+    {
+        return -1;
+    }
+
+    return connection_send(connP, buffer, length);
+}
+
+static int prv_handle_dfota_request(connection_t * connP,
+                                    uint8_t * buffer,
+                                    size_t length)
+{
+    coap_packet_t request[1];
+    char * path;
+    const char * filename;
+    char filePath[PRV_CMDLINE_MAX_LEN];
+    uint32_t blockNum = 0;
+    uint32_t blockOffset = 0;
+    uint16_t blockSize = lwm2m_get_coap_block_size();
+    uint8_t payload[MAX_PACKET_SIZE];
+    size_t payloadLen;
+    long fileSize;
+    FILE * file;
+    int result;
+
+    if (coap_parse_message(request, buffer, (uint16_t)length) != NO_ERROR)
+    {
+        return 0;
+    }
+    if (request->code != COAP_GET || !IS_OPTION(request, COAP_OPTION_URI_PATH))
+    {
+        coap_free_header(request);
+        return 0;
+    }
+
+    path = coap_get_multi_option_as_path_string(request->uri_path);
+    if (path == NULL)
+    {
+        coap_free_header(request);
+        return 0;
+    }
+
+    if (strncmp(path, g_dfotaUriPrefix, strlen(g_dfotaUriPrefix)) != 0
+     || path[strlen(g_dfotaUriPrefix)] != '/')
+    {
+        lwm2m_free(path);
+        coap_free_header(request);
+        return 0;
+    }
+
+    filename = path + strlen(g_dfotaUriPrefix) + 1;
+    if (filename[0] == 0 || strchr(filename, '/') != NULL || strstr(filename, "..") != NULL)
+    {
+        prv_send_dfota_response(connP, request, COAP_400_BAD_REQUEST, 0, 0, blockSize, NULL, 0);
+        lwm2m_free(path);
+        coap_free_header(request);
+        return 1;
+    }
+
+    result = snprintf(filePath, sizeof(filePath), "%s/%s", g_dfotaFwRoot, filename);
+    if (result < 0 || result >= (int)sizeof(filePath))
+    {
+        prv_send_dfota_response(connP, request, COAP_400_BAD_REQUEST, 0, 0, blockSize, NULL, 0);
+        lwm2m_free(path);
+        coap_free_header(request);
+        return 1;
+    }
+
+    file = fopen(filePath, "rb");
+    if (file == NULL)
+    {
+        prv_send_dfota_response(connP, request, COAP_404_NOT_FOUND, 0, 0, blockSize, NULL, 0);
+        lwm2m_free(path);
+        coap_free_header(request);
+        return 1;
+    }
+
+    if (coap_get_header_block2(request, &blockNum, NULL, &blockSize, &blockOffset) == 0)
+    {
+        blockSize = lwm2m_get_coap_block_size();
+        blockOffset = 0;
+    }
+    if (blockSize > sizeof(payload))
+    {
+        blockSize = sizeof(payload);
+    }
+
+    if (fseek(file, 0, SEEK_END) != 0)
+    {
+        fclose(file);
+        prv_send_dfota_response(connP, request, COAP_500_INTERNAL_SERVER_ERROR, 0, 0, blockSize, NULL, 0);
+        lwm2m_free(path);
+        coap_free_header(request);
+        return 1;
+    }
+    fileSize = ftell(file);
+    if (fileSize < 0 || blockOffset >= (uint32_t)fileSize)
+    {
+        fclose(file);
+        prv_send_dfota_response(connP, request, COAP_402_BAD_OPTION, blockNum, 0, blockSize, NULL, 0);
+        lwm2m_free(path);
+        coap_free_header(request);
+        return 1;
+    }
+    if (fseek(file, (long)blockOffset, SEEK_SET) != 0)
+    {
+        fclose(file);
+        prv_send_dfota_response(connP, request, COAP_500_INTERNAL_SERVER_ERROR, 0, 0, blockSize, NULL, 0);
+        lwm2m_free(path);
+        coap_free_header(request);
+        return 1;
+    }
+
+    payloadLen = fread(payload, 1, blockSize, file);
+    if (ferror(file))
+    {
+        fclose(file);
+        prv_send_dfota_response(connP, request, COAP_500_INTERNAL_SERVER_ERROR, 0, 0, blockSize, NULL, 0);
+        lwm2m_free(path);
+        coap_free_header(request);
+        return 1;
+    }
+    fclose(file);
+
+    prv_send_dfota_response(connP,
+                            request,
+                            COAP_205_CONTENT,
+                            blockNum,
+                            blockOffset + payloadLen < (uint32_t)fileSize,
+                            blockSize,
+                            payload,
+                            payloadLen);
+    fprintf(stdout, "\r\nDFOTA GET %s block=%u offset=%u len=%zu more=%u\r\n> ",
+            filePath,
+            blockNum,
+            blockOffset,
+            payloadLen,
+            blockOffset + payloadLen < (uint32_t)fileSize);
+    fflush(stdout);
+
+    lwm2m_free(path);
+    coap_free_header(request);
+    return 1;
 }
 
 static int prv_create_control_socket(const char *path)
@@ -1387,6 +1756,9 @@ void print_usage(void)
     fprintf(stdout, "  -4\t\tUse IPv4 connection. Default: IPv6 connection\r\n");
     fprintf(stdout, "  -l PORT\tSet the local UDP port of the Server. Default: "LWM2M_STANDARD_PORT_STR"\r\n");
     fprintf(stdout, "  -p PATH\tSet Unix control socket path. Default: "PRV_CONTROL_SOCKET_DEFAULT"\r\n");
+    fprintf(stdout, "  -F DIR\tSet DFOTA firmware directory. Default: "PRV_DFOTA_FW_ROOT_DEFAULT"\r\n");
+    fprintf(stdout, "  -u PATH\tSet DFOTA URI prefix. Default: "PRV_DFOTA_URI_PREFIX_DEFAULT"\r\n");
+    fprintf(stdout, "  -H HOST\tSet DFOTA Package URI host/IP. Default: "PRV_DFOTA_HOST_DEFAULT"\r\n");
     fprintf(stdout, "  -S BYTES\tCoAP block size. Options: 16, 32, 64, 128, 256, 512, 1024. Default: %" PRIu16 "\r\n",
             (uint16_t)LWM2M_COAP_DEFAULT_BLOCK_SIZE);
     fprintf(stdout, "\r\n");
@@ -1423,6 +1795,10 @@ int main(int argc, char *argv[])
                                             "   URI: uri to write to such as /3, /3/0/2, /1024/11, /1024/0/1\r\n"
                                             "   DATA: data to write. Text or a supported JSON format.\r\n"
                                             "Result will be displayed asynchronously.", prv_write_client, NULL},
+            {"dfota", "Trigger firmware download.", " dfota CLIENT# FILE\r\n"
+                                            "   CLIENT#: client number as returned by command 'list'\r\n"
+                                            "   FILE: file name under the firmware directory.\r\n"
+                                            "This observes /5/0/3 and writes coap://HOST:PORT/PREFIX/FILE to /5/0/1.", prv_dfota_client, NULL},
             {"update", "Write to a client with partial update.", " update CLIENT# URI DATA\r\n"
                                             "   CLIENT#: client number as returned by command 'list'\r\n"
                                             "   URI: uri to write to such as /3, /3/0/2, /1024/11, /1024/0/1\r\n"
@@ -1495,6 +1871,7 @@ int main(int argc, char *argv[])
                 return 0;
             }
             localPort = argv[opt];
+            g_localPort = localPort;
             break;
         case 'p':
             opt++;
@@ -1504,6 +1881,33 @@ int main(int argc, char *argv[])
                 return 0;
             }
             controlSocketPath = argv[opt];
+            break;
+        case 'F':
+            opt++;
+            if (opt >= argc)
+            {
+                print_usage();
+                return 0;
+            }
+            g_dfotaFwRoot = argv[opt];
+            break;
+        case 'u':
+            opt++;
+            if (opt >= argc || argv[opt][0] != '/')
+            {
+                print_usage();
+                return 0;
+            }
+            g_dfotaUriPrefix = argv[opt];
+            break;
+        case 'H':
+            opt++;
+            if (opt >= argc)
+            {
+                print_usage();
+                return 0;
+            }
+            g_dfotaHost = argv[opt];
             break;
         case 'S':
             opt++;
@@ -1640,7 +2044,10 @@ int main(int argc, char *argv[])
                     }
                     if (connP != NULL)
                     {
-                        lwm2m_handle_packet(lwm2mH, buffer, (size_t)numBytes, connP);
+                        if (!prv_handle_dfota_request(connP, buffer, (size_t)numBytes))
+                        {
+                            lwm2m_handle_packet(lwm2mH, buffer, (size_t)numBytes, connP);
+                        }
                     }
                 }
             }
