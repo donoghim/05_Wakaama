@@ -255,7 +255,7 @@ error:
 
 void transaction_free(lwm2m_transaction_t * transacP)
 {
-    LOG_ARG("Entering. transaction=%p", transacP);
+    // LOG_ARG("Entering. transaction=%p", transacP);
     if (transacP->message)
     {
        coap_free_header(transacP->message);
@@ -279,7 +279,7 @@ void transaction_free(lwm2m_transaction_t * transacP)
 void transaction_remove(lwm2m_context_t * contextP,
                         lwm2m_transaction_t * transacP)
 {
-    LOG_ARG("Entering. transaction=%p", transacP);
+    // LOG_ARG("Entering. transaction=%p", transacP);
     contextP->transactionList = (lwm2m_transaction_t *) LWM2M_LIST_RM(contextP->transactionList, transacP->mID, NULL);
     transaction_free(transacP);
 }

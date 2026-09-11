@@ -1344,6 +1344,8 @@ int main(int argc, char *argv[])
          *    (eg. retransmission) and the time between the next operation
          */
         result = lwm2m_step(lwm2mH, &(tv.tv_sec));
+
+        #if 0 // debug log
         fprintf(stdout, " -> State: ");
         switch (lwm2mH->state)
         {
@@ -1369,6 +1371,8 @@ int main(int argc, char *argv[])
             fprintf(stdout, "Unknown...\r\n");
             break;
         }
+        #endif
+        
         if (result != 0)
         {
             fprintf(stderr, "lwm2m_step() failed: 0x%X\r\n", result);

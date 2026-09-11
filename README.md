@@ -330,6 +330,7 @@ cd ~/Wakaama/05_Wakaama/07_sender
 4. DFOTA 실행:
    ```text
    dfota 0 A02_beta_to_A02.bin
+   dfota 0 A02_to_A02_beta.bin
    ```
 
 서버 내부 동작:

@@ -62,7 +62,7 @@ lwm2m_context_t * lwm2m_init(void * userData)
 {
     lwm2m_context_t * contextP;
 
-    LOG("Entering");
+    // LOG("Entering");
     contextP = (lwm2m_context_t *)lwm2m_malloc(sizeof(lwm2m_context_t));
     if (NULL != contextP)
     {

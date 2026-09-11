@@ -1721,7 +1721,7 @@ static lwm2m_client_t * prv_getClientByName(lwm2m_context_t * contextP,
 
 void registration_freeClient(lwm2m_client_t * clientP)
 {
-    LOG("Entering");
+    // LOG("Entering");
     if (clientP->name != NULL) lwm2m_free(clientP->name);
     if (clientP->msisdn != NULL) lwm2m_free(clientP->msisdn);
     if (clientP->altPath != NULL) lwm2m_free(clientP->altPath);
@@ -2038,7 +2038,7 @@ void lwm2m_set_monitoring_callback(lwm2m_context_t * contextP,
                                    lwm2m_result_callback_t callback,
                                    void * userData)
 {
-    LOG("Entering");
+    // LOG("Entering");
     contextP->monitorCallback = callback;
     contextP->monitorUserData = userData;
 }
