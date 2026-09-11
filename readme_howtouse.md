@@ -22,7 +22,7 @@
 ### 1-1. Bootstrap Server 실행
 
 ```sh
-cd ~/Wakaama/05_Wakaama/02_bs_server
+cd ~/Wakaama/05_Wakaama/run/bootstrap_server
 ./00_bs_plain.sh
 ```
 
@@ -39,7 +39,7 @@ cd ~/Wakaama/05_Wakaama/02_bs_server
 ### 1-2. LwM2M Server 실행
 
 ```sh
-cd ~/Wakaama/05_Wakaama/05_server
+cd ~/Wakaama/05_Wakaama/run/server
 ./11_server_sender_dfota.sh
 ```
 
@@ -91,7 +91,7 @@ cd ~/Wakaama/05_Wakaama/07_sender
 - `-i`: 실행 직후 1회 즉시 write
 - `-v`: queued 로그 출력
 
-`sender`는 LwM2M 패킷을 직접 보내지 않고, `/tmp/lwm2mserver-control.sock`으로 server에 write 요청을 전달한다. 실제 LwM2M Write 결과는 `05_server`의 `lwm2mserver` 콘솔에 비동기로 출력된다.
+`sender`는 LwM2M 패킷을 직접 보내지 않고, `/tmp/lwm2mserver-control.sock`으로 server에 write 요청을 전달한다. 실제 LwM2M Write 결과는 `run/server`의 `lwm2mserver` 콘솔에 비동기로 출력된다.
 
 ## 2. EPNS 등록 설정
 
@@ -100,7 +100,7 @@ EPNS endpoint는 Bootstrap Server 설정 파일에서 등록한다.
 사용 파일:
 
 ```text
-~/Wakaama/05_Wakaama/02_bs_server/01_bs_plain.ini
+~/Wakaama/05_Wakaama/run/bootstrap_server/01_bs_plain.ini
 ```
 
 현재 등록된 endpoint 예시는 아래와 같다.
@@ -136,7 +136,7 @@ Lifetime도 Bootstrap Server 설정 파일에서 변경한다.
 사용 파일:
 
 ```text
-~/Wakaama/05_Wakaama/02_bs_server/01_bs_plain.ini
+~/Wakaama/05_Wakaama/run/bootstrap_server/01_bs_plain.ini
 ```
 
 현재 NoSec 서버 설정은 아래와 같다.
@@ -195,7 +195,7 @@ q
 
 ## 5. LwM2M Server 콘솔 명령
 
-`05_server`의 `lwm2mserver` 콘솔에서 `help`를 입력하면 명령 목록을 볼 수 있다. 주요 명령은 아래와 같다.
+`run/server`의 `lwm2mserver` 콘솔에서 `help`를 입력하면 명령 목록을 볼 수 있다. 주요 명령은 아래와 같다.
 
 ### 등록 client 확인
 
@@ -313,7 +313,7 @@ q
 
 ### 방법 1: LwM2M Server 콘솔에서 직접 write
 
-`05_server` 터미널에서 client ID를 확인한다.
+`run/server` 터미널에서 client ID를 확인한다.
 
 ```text
 list
@@ -375,14 +375,14 @@ Firmware 파일은 server 실행 위치 기준 `dfota_fw` 디렉터리에 있어
 현재 확인된 파일:
 
 ```text
-~/Wakaama/05_Wakaama/05_server/dfota_fw/A02_to_A02_beta.bin
-~/Wakaama/05_Wakaama/05_server/dfota_fw/A02_beta_to_A02.bin
+~/Wakaama/05_Wakaama/run/server/dfota_fw/A02_to_A02_beta.bin
+~/Wakaama/05_Wakaama/run/server/dfota_fw/A02_beta_to_A02.bin
 ```
 
 ### 7-2. DFOTA 가능한 server로 실행
 
 ```sh
-cd ~/Wakaama/05_Wakaama/05_server
+cd ~/Wakaama/05_Wakaama/run/server
 ./11_server_sender_dfota.sh
 ```
 
@@ -456,5 +456,5 @@ exec 0 /5/0/2
 - `01_bs_plain.ini`의 `uri=coap://115.90.109.11:22102`가 실제 server IP와 port를 가리켜야 한다.
 - 새 EPNS를 추가하거나 lifetime을 바꾼 뒤에는 Bootstrap Server를 재시작해야 한다.
 - Sender를 쓰려면 server가 `-p /tmp/lwm2mserver-control.sock` 옵션으로 실행되어 있어야 한다.
-- DFOTA 파일명에는 `/` 또는 `..`을 넣을 수 없다. 파일은 `05_server/dfota_fw` 아래에 있어야 한다.
+- DFOTA 파일명에는 `/` 또는 `..`을 넣을 수 없다. 파일은 `run/server/dfota_fw` 아래에 있어야 한다.
 - server 콘솔에서 client ID는 항상 `list`로 확인한 값을 사용한다.

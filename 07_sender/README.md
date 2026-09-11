@@ -15,7 +15,9 @@ cmake --build build
 Start the DM server with its control socket enabled:
 
 ```sh
-../05_server/lwm2mserver -4 -p /tmp/lwm2mserver-control.sock
+../run/server/00_server.sh
+# or directly:
+../build/server/lwm2mserver -4 -l 22102 -p /tmp/lwm2mserver-control.sock
 ```
 
 Queue the current Unix time every 60 seconds for client 0:

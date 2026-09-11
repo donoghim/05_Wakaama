@@ -1,1 +1,0 @@
-cmd='/home/young/work/00_svn/05_Wakaama/03_client/examples/shared/tinydtls/configure;--host=cc'

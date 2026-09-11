@@ -4,9 +4,9 @@
 
 ## 1. 구성과 용어
 
-- 서버: `05_server/lwm2mserver`
-- 예제 클라이언트: `03_client/lwm2mclient`
-- 서버 UDP 포트: `22102` (`05_server/00_server.sh` 기준)
+- 서버: `build/server/lwm2mserver` (실행 스크립트: `run/server/00_server.sh`)
+- 예제 클라이언트: `build/client/lwm2mclient` (실행 스크립트: `run/client/00_client.sh`)
+- 서버 UDP 포트: `22102` (`run/server/00_server.sh` 기준)
 - Endpoint Name (`ep`): LwM2M 장비의 논리 식별자. 장비별로 고유해야 한다.
 - Client ID: 서버가 실행 중에만 사용하는 번호. 서버 재시작 뒤에는 바뀔 수 있다.
 
@@ -17,14 +17,15 @@
 터미널 1에서 서버를 실행한다.
 
 ```bash
-cd /home/quectel/Wakaama/05_Wakaama/05_server
+cd /home/quectel/Wakaama/05_Wakaama/run/server
 ./00_server.sh
 ```
 
 스크립트 대신 직접 실행할 수도 있다.
 
 ```bash
-./lwm2mserver -4 -l 22102
+cd /home/quectel/Wakaama/05_Wakaama
+./build/server/lwm2mserver -4 -l 22102
 ```
 
 서버 콘솔에서 사용할 수 있는 기본 명령은 다음과 같다.
@@ -45,9 +46,11 @@ q
 터미널 2에서 예제 클라이언트를 실행한다.
 
 ```bash
-cd /home/quectel/Wakaama/05_Wakaama/03_client
-./lwm2mclient -4 -h 127.0.0.1 -p 22102 -n client01
+cd /home/quectel/Wakaama/05_Wakaama
+./build/client/lwm2mclient -4 -h 127.0.0.1 -p 22102 -n client01
 ```
+
+또는 `run/client/00_client.sh` (환경변수 `HOST`, `PORT`, `EP`로 조정 가능)를 사용해도 된다.
 
 서버에 다음과 같이 표시되면 등록 성공이다.
 

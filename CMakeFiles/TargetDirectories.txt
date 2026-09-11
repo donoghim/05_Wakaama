@@ -1,3 +1,0 @@
-/home/young/work/00_svn/05_Wakaama/CMakeFiles/lwm2mserver.dir
-/home/young/work/00_svn/05_Wakaama/CMakeFiles/edit_cache.dir
-/home/young/work/00_svn/05_Wakaama/CMakeFiles/rebuild_cache.dir
