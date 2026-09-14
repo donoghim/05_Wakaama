@@ -220,7 +220,7 @@ cd ~/Wakaama/05_Wakaama/07_sender
 
 기존 tmux/foreground 실행 방식은 콘솔 명령을 직접 입력하거나 디버깅할 때 유지할 수 있다. 로컬 웹 대시보드를 사용하면 Bootstrap Server와 LwM2M Server를 `systemd --user`가 관리하고, 브라우저에서 상태/로그/Bootstrap INI/EPNS/Write/DFOTA를 관리한다.
 
-대시보드는 기본적으로 `127.0.0.1:8080`에만 열리므로 같은 PC의 브라우저에서만 접근할 수 있다.
+대시보드는 기본적으로 `127.0.0.1:8080`에만 열리므로 같은 PC의 브라우저에서만 접근할 수 있다. 내부망에서 접속해야 하면 `WAKAAMA_DASHBOARD_HOST=0.0.0.0`으로 host를 열거나 `run/dashboard/00_dashboard_start.sh`를 사용한다.
 
 ### 1) 서비스 설치와 시작
 
@@ -264,7 +264,7 @@ WAKAAMA_SERVER_SERVICE=wakaama-server.service \
 ./dashboard/start.sh
 ```
 
-브라우저에서 `http://127.0.0.1:8080`으로 접속한다. 처음 실행하면 `dashboard/.venv` 가상환경을 사용한다. 다른 포트를 사용하려면 아래처럼 실행한다.
+브라우저에서 `http://127.0.0.1:8080`으로 접속한다. 처음 실행하면 `dashboard/.venv` 가상환경을 사용한다. 172.x 내부망에서 접속하려면 `WAKAAMA_DASHBOARD_HOST=0.0.0.0`을 함께 지정하고, 브라우저에서는 장비의 172.x address로 접속한다. 다른 포트를 사용하려면 아래처럼 실행한다.
 
 ```sh
 WAKAAMA_DASHBOARD_PORT=8081 \
@@ -290,7 +290,7 @@ Write 또는 DFOTA가 `queued`로 표시되면 local control socket 전달은 �
 
 | Script | 설명 |
 |---|---|
-| `00_dashboard_start.sh` | Dashboard 시작 (`127.0.0.1:8080`) |
+| `00_dashboard_start.sh` | Dashboard 시작 (`0.0.0.0:8080`, 172.x address 우선 안내) |
 | `01_server_start.sh` | Bootstrap Server와 LwM2M Server를 함께 시작 |
 | `02_server_stop.sh` | 두 service를 함께 중지 |
 | `03_server_restart.sh` | 두 service를 함께 재시작 |

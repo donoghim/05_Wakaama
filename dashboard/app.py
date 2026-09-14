@@ -29,7 +29,7 @@ SERVER_LOG = Path(os.environ.get("WAKAAMA_SERVER_LOG", DEFAULT_LOG_DIR / "server
 CONTROL_SOCKET = os.environ.get("WAKAAMA_CONTROL_SOCKET", "/tmp/lwm2mserver-control.sock")
 DFOTA_FIRMWARE_DIR = Path(os.environ.get("WAKAAMA_DFOTA_FIRMWARE_DIR", PROJECT_DIR / "run" / "server" / "dfota_fw"))
 MAX_LOG_BYTES = 48 * 1024
-LISTEN_HOST = "127.0.0.1"
+LISTEN_HOST = os.environ.get("WAKAAMA_DASHBOARD_HOST", "127.0.0.1")
 LISTEN_PORT = int(os.environ.get("WAKAAMA_DASHBOARD_PORT", "8080"))
 
 
@@ -92,21 +92,66 @@ def read_service_log(path, tmux_marker, systemd_service=""):
 
 def parse_registered_clients(contents):
     clients = {}
-    blocks = re.finditer(r"Client #(\d+):\s*\n(?P<details>(?:\s+[^\n]+\n)+)", contents)
-    for block in blocks:
-        details = block.group("details")
-        client = {"id": int(block.group(1)), "name": "", "version": "", "binding": "", "lifetime": "", "objects": ""}
-        for key, value in re.findall(r"^\s*(name|version|binding|lifetime|objects):\s*(.+)$", details, re.MULTILINE):
+    client = None
+    for line in contents.splitlines():
+        header = re.match(r"^\s*Client #(\d+):\s*$", line)
+        if header:
+            if client and client["name"]:
+                clients[client["id"]] = client
+            client = {"id": int(header.group(1)), "name": "", "version": "", "binding": "", "lifetime": "", "objects": ""}
+            continue
+        if client is None:
+            continue
+        field = re.match(r"^\s*(name|version|binding|lifetime|objects):\s*(.+)$", line)
+        if field:
+            key, value = field.groups()
             value = value.strip().strip('"')
             client[key] = value[:-1] if value.endswith(",") else value
-        if client["name"]:
-            clients[client["id"]] = client
+        elif client["objects"] and re.match(r"^\s*/[0-9]", line):
+            client["objects"] = "{}, {}".format(client["objects"], line.strip().rstrip(","))
+    if client and client["name"]:
+        clients[client["id"]] = client
     return sorted(clients.values(), key=lambda client: client["id"])
 
 
+def request_control_list():
+    client_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    client_socket.settimeout(1)
+    temporary_path = None
+    try:
+        file_descriptor, temporary_path = tempfile.mkstemp(prefix="wakaama-dashboard-", dir="/tmp")
+        os.close(file_descriptor)
+        os.unlink(temporary_path)
+        client_socket.bind(temporary_path)
+        client_socket.sendto(b"LIST", CONTROL_SOCKET)
+        response = client_socket.recv(8192).decode("utf-8", errors="replace")
+    except OSError as error:
+        raise ValueError("Unable to request live client list: {}".format(error))
+    finally:
+        client_socket.close()
+        if temporary_path:
+            try:
+                os.unlink(temporary_path)
+            except FileNotFoundError:
+                pass
+
+    clients = []
+    for line in response.splitlines():
+        fields = line.split("\t")
+        if len(fields) != 5 or not fields[0].isdigit():
+            continue
+        clients.append({"id": int(fields[0]), "name": fields[1], "version": fields[2],
+                        "binding": fields[3], "lifetime": "{} sec".format(fields[4]), "objects": ""})
+    return sorted(clients, key=lambda client: client["id"])
+
+
 def registered_clients():
+    try:
+        return {"source": "local control socket", "available": True, "clients": request_control_list()}
+    except ValueError as error:
+        fallback_error = str(error)
     log = read_service_log(SERVER_LOG, ("lwm2mserver", "Client #", "Notify from client", "[lwm2m_handle_packet:"), SERVER_SERVICE)
-    return {"source": log["path"], "available": log["available"], "clients": parse_registered_clients(log["contents"])}
+    return {"source": "{} (fallback: {})".format(log["path"], fallback_error), "available": log["available"], "clients": parse_registered_clients(log["contents"])}
 
 
 def queue_write(endpoint_name, uri, value):

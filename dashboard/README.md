@@ -26,6 +26,15 @@ browser에서 `http://127.0.0.1:8080`을 연다. 다른 local port를 사용하�
 WAKAAMA_DASHBOARD_PORT=8081 ./dashboard/start.sh
 ```
 
+172.x 내부망에서 접속하려면 host를 열어서 실행한다.
+
+```bash
+WAKAAMA_DASHBOARD_HOST=0.0.0.0 ./dashboard/start.sh
+```
+
+또는 `run/dashboard/00_dashboard_start.sh`를 사용하면 기본적으로 모든 interface에 bind하고,
+장비에 172.x address가 있으면 해당 URL을 안내한다.
+
 ## Bootstrap INI 관리
 
 dashboard는 기본적으로 `run/bootstrap_server/01_bs_plain.ini`를 관리한다. Server ID와

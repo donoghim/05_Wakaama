@@ -1145,8 +1145,11 @@ static int prv_create_control_socket(const char *path)
 
 static void prv_handle_control_request(lwm2m_context_t *lwm2mH, int socket_fd)
 {
+    struct sockaddr_un peer_address;
+    socklen_t peer_address_length = sizeof(peer_address);
     char request[PRV_CMDLINE_MAX_LEN];
     char command[PRV_CMDLINE_MAX_LEN];
+    char response[PRV_CMDLINE_MAX_LEN];
     char *command_name;
     char *client_id;
     char *data;
@@ -1155,7 +1158,8 @@ static void prv_handle_control_request(lwm2m_context_t *lwm2mH, int socket_fd)
     char *uri;
     ssize_t length;
 
-    length = recv(socket_fd, request, sizeof(request) - 1, 0);
+    length = recvfrom(socket_fd, request, sizeof(request) - 1, 0,
+                      (struct sockaddr *)&peer_address, &peer_address_length);
     if (length < 0)
     {
         perror("control recv");
@@ -1166,6 +1170,36 @@ static void prv_handle_control_request(lwm2m_context_t *lwm2mH, int socket_fd)
     save = NULL;
     command_name = strtok_r(request, "\t", &save);
     client_id = strtok_r(NULL, "\t", &save);
+    if (command_name != NULL && strcmp(command_name, "LIST") == 0)
+    {
+        lwm2m_client_t * clientP;
+        size_t response_length = 0;
+
+        if (client_id != NULL)
+        {
+            fprintf(stderr, "Invalid control request.\r\n");
+            return;
+        }
+        response[0] = '\0';
+        for (clientP = lwm2mH->clientList; clientP != NULL; clientP = clientP->next)
+        {
+            int written = snprintf(response + response_length, sizeof(response) - response_length,
+                                   "%u\t%s\t%s\t%u\t%d\n", clientP->internalID, clientP->name,
+                                   prv_dump_version(clientP->version), clientP->binding, clientP->lifetime);
+            if (written < 0 || (size_t)written >= sizeof(response) - response_length)
+            {
+                fprintf(stderr, "Control LIST response is too long.\r\n");
+                return;
+            }
+            response_length += (size_t)written;
+        }
+        if (sendto(socket_fd, response, response_length, 0,
+                   (struct sockaddr *)&peer_address, peer_address_length) != (ssize_t)response_length)
+        {
+            perror("control LIST response");
+        }
+        return;
+    }
     if (command_name != NULL && strcmp(command_name, "DFOTA") == 0)
     {
         filename = strtok_r(NULL, "\t", &save);
