@@ -1150,6 +1150,7 @@ static void prv_handle_control_request(lwm2m_context_t *lwm2mH, int socket_fd)
     char *command_name;
     char *client_id;
     char *data;
+    char *filename;
     char *save;
     char *uri;
     ssize_t length;
@@ -1165,6 +1166,21 @@ static void prv_handle_control_request(lwm2m_context_t *lwm2mH, int socket_fd)
     save = NULL;
     command_name = strtok_r(request, "\t", &save);
     client_id = strtok_r(NULL, "\t", &save);
+    if (command_name != NULL && strcmp(command_name, "DFOTA") == 0)
+    {
+        filename = strtok_r(NULL, "\t", &save);
+        if (client_id == NULL || filename == NULL || save == NULL || save[0] != '\0'
+            || snprintf(command, sizeof(command), "%s %s", client_id, filename) >= (int)sizeof(command))
+        {
+            fprintf(stderr, "Invalid control request.\r\n");
+            return;
+        }
+        prv_dfota_client(lwm2mH, command, NULL);
+        fprintf(stdout, "\r\n> ");
+        fflush(stdout);
+        return;
+    }
+
     uri = strtok_r(NULL, "\t", &save);
     data = save;
     if (command_name == NULL || strcmp(command_name, "WRITE") != 0

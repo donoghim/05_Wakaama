@@ -1,0 +1,18 @@
+[Unit]
+Description=Wakaama LwM2M Server with DFOTA
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/quectel/Wakaama/05_Wakaama/run/server
+ExecStart=/home/quectel/Wakaama/05_Wakaama/build/server/lwm2mserver -4 -l 22102 -p /tmp/lwm2mserver-control.sock -F dfota_fw -u /dfota_fw -H 115.90.109.11
+KillSignal=SIGINT
+Restart=on-failure
+RestartSec=2
+StandardInput=null
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

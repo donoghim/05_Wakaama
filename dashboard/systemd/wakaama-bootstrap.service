@@ -1,0 +1,18 @@
+[Unit]
+Description=Wakaama Bootstrap Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/quectel/Wakaama/05_Wakaama/run/bootstrap_server
+ExecStart=/home/quectel/Wakaama/05_Wakaama/build/bootstrap_server/bootstrap_server -l 22101 -4 -f /home/quectel/Wakaama/05_Wakaama/run/bootstrap_server/01_bs_plain.ini
+KillSignal=SIGINT
+Restart=on-failure
+RestartSec=2
+StandardInput=null
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

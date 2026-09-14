@@ -1,0 +1,2 @@
+# This dashboard intentionally uses only the Python standard library.
+# Keep this file so setup remains consistent if dependencies are added later.

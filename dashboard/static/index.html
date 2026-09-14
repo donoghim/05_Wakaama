@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wakaama Local Console</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">LOCAL OBSERVABILITY</p>
+      <h1>Wakaama Console</h1>
+    </div>
+    <p id="refresh-status" class="refresh-status">Connecting...</p>
+  </header>
+  <main>
+    <section class="service-panel" aria-labelledby="bootstrap-title">
+      <div class="panel-heading">
+        <div><p class="service-label">UDP 22101</p><h2 id="bootstrap-title">Bootstrap Server</h2></div>
+        <span id="bootstrap-state" class="state">Checking</span>
+      </div>
+      <p id="bootstrap-process" class="process">No process data</p>
+      <pre id="bootstrap-log" class="log" aria-live="polite">Waiting for log data...</pre>
+      <p id="bootstrap-log-path" class="log-path"></p>
+      <div class="controls">
+        <div class="control-heading"><h3>Bootstrap Configuration</h3><span id="ini-state" class="message"></span></div>
+        <label for="endpoint-name">Add EPNS</label>
+        <div class="endpoint-form"><input id="endpoint-name" autocomplete="off" placeholder="Endpoint name"><select id="server-id"></select><button id="add-endpoint" type="button">Add</button></div>
+        <label for="ini-editor">Managed INI</label>
+        <textarea id="ini-editor" spellcheck="false" aria-label="Bootstrap INI editor"></textarea>
+        <div class="button-row"><button id="preview-ini" type="button">Preview changes</button><button id="save-ini" type="button">Save backup + apply</button><button id="restart-bootstrap" type="button">Restart Bootstrap</button></div>
+        <pre id="ini-diff" class="diff">No pending changes.</pre>
+      </div>
+    </section>
+    <section class="service-panel" aria-labelledby="server-title">
+      <div class="panel-heading">
+        <div><p class="service-label">UDP 22102</p><h2 id="server-title">LwM2M Server</h2></div>
+        <span id="server-state" class="state">Checking</span>
+      </div>
+      <p id="server-process" class="process">No process data</p>
+      <div class="clients-panel">
+        <div class="control-heading"><h3>Registered Clients</h3><span id="clients-source" class="message"></span></div>
+        <div class="client-table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Endpoint</th><th>Binding</th><th>Lifetime</th><th>Objects</th></tr></thead>
+            <tbody id="clients-table"><tr><td colspan="5">Loading clients...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="write-panel">
+        <div class="control-heading"><h3>Queue Write</h3><span id="write-state" class="message"></span></div>
+        <div class="write-form">
+          <label for="write-endpoint">Endpoint</label><select id="write-endpoint"></select>
+          <label for="write-uri">Resource URI</label><input id="write-uri" value="/10250/0/1" spellcheck="false">
+          <label for="write-value">Value</label><input id="write-value" placeholder="Value to write" spellcheck="false">
+          <button id="queue-write" type="button">Queue Write</button>
+        </div>
+        <p class="operation-note">The request is queued through the local control socket. Check the Server log for the CoAP response.</p>
+      </div>
+      <div class="dfota-panel">
+        <div class="control-heading"><h3>Deploy DFOTA</h3><span id="dfota-state" class="message"></span></div>
+        <div class="write-form">
+          <label for="dfota-endpoint">Endpoint</label><select id="dfota-endpoint"></select>
+          <label for="firmware-file">Approved firmware</label><select id="firmware-file"></select>
+          <label>SHA-256</label><code id="firmware-hash">Loading...</code>
+          <button id="queue-dfota" type="button">Deploy DFOTA</button>
+        </div>
+        <p class="operation-note">Only artifacts in the approved local firmware directory can be deployed. Check the Server log for download and result status.</p>
+      </div>
+      <pre id="server-log" class="log" aria-live="polite">Waiting for log data...</pre>
+      <p id="server-log-path" class="log-path"></p>
+    </section>
+  </main>
+  <footer>Read-only local dashboard. Existing tmux sessions and server commands are unchanged.</footer>
+  <script src="/app.js"></script>
+</body>
+</html>

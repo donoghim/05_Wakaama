@@ -562,6 +562,7 @@ int main(int argc, char *argv[])
     internal_data_t data;
     const char *filename = "bootstrap_server.ini";
     int opt;
+    bool stdin_is_tty;
     FILE * fd;
     lwm2m_context_t * lwm2mH;
     command_desc_t commands[] =
@@ -663,11 +664,14 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Reading Bootstrap Info from file %s failed.\r\n", filename);
         return -1;
     }
-
     lwm2m_set_bootstrap_callback(lwm2mH, prv_bootstrap_callback, (void *)&data);
 
     fprintf(stdout, "LWM2M Bootstrap Server now listening on port %s.\r\n\n", port);
-    fprintf(stdout, "> "); fflush(stdout);
+    stdin_is_tty = isatty(STDIN_FILENO);
+    if (stdin_is_tty)
+    {
+        fprintf(stdout, "> "); fflush(stdout);
+    }
 
     while (0 == g_quit)
     {
@@ -675,7 +679,10 @@ int main(int argc, char *argv[])
 
         FD_ZERO(&readfds);
         FD_SET(data.sock, &readfds);
-        FD_SET(STDIN_FILENO, &readfds);
+        if (stdin_is_tty)
+        {
+            FD_SET(STDIN_FILENO, &readfds);
+        }
 
         tv.tv_sec = 60;
         tv.tv_usec = 0;
@@ -758,7 +765,7 @@ int main(int argc, char *argv[])
                 }
             }
             // command line input
-            else if (FD_ISSET(STDIN_FILENO, &readfds))
+            else if (stdin_is_tty && FD_ISSET(STDIN_FILENO, &readfds))
             {
                 numBytes = read(STDIN_FILENO, buffer, MAX_PACKET_SIZE - 1);
 
