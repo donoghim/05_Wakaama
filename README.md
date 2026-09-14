@@ -306,6 +306,18 @@ cd ~/Wakaama/05_Wakaama/run/dashboard
 ./00_dashboard_start.sh
 ```
 
+Dashboard와 service를 종료하려면 아래 순서로 실행한다. `00_dashboard_start.sh`를 실행한 terminal에서 `Ctrl+C`를 누르면 Dashboard만 종료되며, Bootstrap Server와 LwM2M Server는 계속 실행된다.
+
+```sh
+# 1. Dashboard를 실행한 terminal에서 Ctrl+C
+
+# 2. 다른 terminal에서 두 service를 함께 중지
+cd ~/Wakaama/05_Wakaama/run/dashboard
+./02_server_stop.sh
+```
+
+개별 service만 중지하려면 `./11_bs_stop.sh` 또는 `./21_lwm2m_stop.sh`를 사용한다. 종료 뒤 상태는 `./30_status.sh`로 확인한다.
+
 개별 service를 제어하거나 직접 command를 사용하려면 아래와 같다.
 
 ```sh
