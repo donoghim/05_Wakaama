@@ -64,6 +64,11 @@ service는 현재 DFOTA launch setting을 유지한다: UDP `22102`, local contr
 `/dfota_fw`, DFOTA host `115.90.109.11`. Server console input은 비활성화되므로
 client 확인, Write, DFOTA action은 dashboard에서 수행한다.
 
+Dashboard의 각 Server panel에는 `Start`, `Restart`, `Stop` button이 있다. button은
+`WAKAAMA_BOOTSTRAP_SERVICE`, `WAKAAMA_SERVER_SERVICE`로 설정된 user service만 제어하며,
+다른 shell command는 실행하지 않는다. `Stop` 또는 `Restart` 뒤에는 device가 다시
+Bootstrap/Register해야 LwM2M Server의 registered-client table에 다시 표시된다.
+
 ## 기존 tmux Pane 연결
 
 기존처럼 Bootstrap Server와 LwM2M Server를 tmux에서 실행한 상태로 유지할 수 있다.

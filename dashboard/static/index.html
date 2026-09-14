@@ -18,7 +18,7 @@
     <section class="service-panel" aria-labelledby="bootstrap-title">
       <div class="panel-heading">
         <div><p class="service-label">UDP 22101</p><h2 id="bootstrap-title">Bootstrap Server</h2></div>
-        <span id="bootstrap-state" class="state">Checking</span>
+        <div class="service-actions"><span id="bootstrap-state" class="state">Checking</span><button class="service-action" data-target="bootstrap" data-action="start" type="button" title="Start Bootstrap Server">Start</button><button class="service-action" data-target="bootstrap" data-action="restart" type="button" title="Restart Bootstrap Server">Restart</button><button class="service-action danger" data-target="bootstrap" data-action="stop" type="button" title="Stop Bootstrap Server">Stop</button></div>
       </div>
       <p id="bootstrap-process" class="process">No process data</p>
       <pre id="bootstrap-log" class="log" aria-live="polite">Waiting for log data...</pre>
@@ -36,7 +36,7 @@
     <section class="service-panel" aria-labelledby="server-title">
       <div class="panel-heading">
         <div><p class="service-label">UDP 22102</p><h2 id="server-title">LwM2M Server</h2></div>
-        <span id="server-state" class="state">Checking</span>
+        <div class="service-actions"><span id="server-state" class="state">Checking</span><button class="service-action" data-target="server" data-action="start" type="button" title="Start LwM2M Server">Start</button><button class="service-action" data-target="server" data-action="restart" type="button" title="Restart LwM2M Server">Restart</button><button class="service-action danger" data-target="server" data-action="stop" type="button" title="Stop LwM2M Server">Stop</button></div>
       </div>
       <p id="server-process" class="process">No process data</p>
       <div class="clients-panel">

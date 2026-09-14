@@ -13,6 +13,19 @@ function setServiceState(name, status) {
     `Process not found. UDP ${status.port}: ${status.listener ? "listening" : "not listening"}`;
 }
 
+async function controlService(target, action) {
+  const label = target === "bootstrap" ? "Bootstrap Server" : "LwM2M Server";
+  if ((action === "stop" || action === "restart") && !window.confirm(`${action} ${label}?`)) return;
+  const response = await fetch(`/api/services/${target}/${action}`, { method: "POST" });
+  const payload = await response.json();
+  if (!response.ok) {
+    document.getElementById("refresh-status").textContent = payload.error;
+    return;
+  }
+  document.getElementById("refresh-status").textContent = `${label}: ${action} requested`;
+  window.setTimeout(refresh, 350);
+}
+
 function updateLog(name, log) {
   const element = document.getElementById(`${name}-log`);
   const atBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 8;
@@ -184,6 +197,10 @@ document.getElementById("queue-dfota").addEventListener("click", async () => {
   const payload = await response.json();
   if (!response.ok) { setDfotaMessage(payload.error, true); return; }
   setDfotaMessage(`Queued for client #${payload.client_id} at ${new Date(payload.queued_at).toLocaleTimeString()}`);
+});
+
+document.querySelectorAll(".service-action").forEach((button) => {
+  button.addEventListener("click", () => controlService(button.dataset.target, button.dataset.action));
 });
 
 loadIni().catch((error) => setIniMessage(error.message, true));

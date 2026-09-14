@@ -303,6 +303,27 @@ def restart_bootstrap_server():
     return {"command": RESTART_COMMAND, "output": result.stdout[-2000:]}
 
 
+def managed_service(target):
+    services = {"bootstrap": BOOTSTRAP_SERVICE, "server": SERVER_SERVICE}
+    service_name = services.get(target)
+    if not service_name:
+        raise ValueError("{} service control is not configured".format(target.capitalize()))
+    if not re.fullmatch(r"[A-Za-z0-9_.@-]+\.service", service_name):
+        raise ValueError("Invalid configured {} service name".format(target))
+    return service_name
+
+
+def control_service(target, action):
+    if action not in ("start", "stop", "restart"):
+        raise ValueError("Unsupported service action")
+    service_name = managed_service(target)
+    result = subprocess.run(["systemctl", "--user", action, service_name], stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT, text=True, timeout=20, check=False)
+    if result.returncode != 0:
+        raise ValueError("{} failed (exit {}): {}".format(action.capitalize(), result.returncode, result.stdout[-2000:]))
+    return {"target": target, "action": action, "service": service_name, "active": systemd_service_active(service_name)}
+
+
 def process_status(process_name):
     result = subprocess.run(["pgrep", "-af", process_name], stdout=subprocess.PIPE,
                             stderr=subprocess.DEVNULL, text=True, check=False)
@@ -325,12 +346,16 @@ def udp_port_open(port):
 
 
 def dashboard_status():
+    bootstrap = {"port": 22101, "listener": udp_port_open(22101), **process_status("bootstrap_server")}
+    if BOOTSTRAP_SERVICE:
+        bootstrap["service"] = BOOTSTRAP_SERVICE
+        bootstrap["service_active"] = systemd_service_active(BOOTSTRAP_SERVICE)
     server = {"port": 22102, "listener": udp_port_open(22102), **process_status("lwm2mserver")}
     if SERVER_SERVICE:
         server["service"] = SERVER_SERVICE
         server["service_active"] = systemd_service_active(SERVER_SERVICE)
     return {
-        "bootstrap": {"port": 22101, "listener": udp_port_open(22101), **process_status("bootstrap_server")},
+        "bootstrap": bootstrap,
         "server": server,
     }
 
@@ -371,6 +396,16 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path = urlparse(self.path).path
+        if path.startswith("/api/services/"):
+            parts = path.split("/")
+            if len(parts) != 5:
+                self.send_error(HTTPStatus.NOT_FOUND)
+                return
+            try:
+                self.send_json(control_service(parts[3], parts[4]), HTTPStatus.OK)
+            except ValueError as error:
+                self.send_json({"error": str(error)}, HTTPStatus.BAD_REQUEST)
+            return
         if path not in ("/api/bootstrap/ini", "/api/bootstrap/restart", "/api/write", "/api/dfota"):
             self.send_error(HTTPStatus.NOT_FOUND)
             return

@@ -9,6 +9,8 @@ h1, h2 { margin: 4px 0 0; letter-spacing: 0; } h1 { font-size: 27px; } h2 { font
 main { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 16px 0; }
 .service-panel { min-width: 0; border: 1px solid var(--panel-edge); border-radius: 6px; background: var(--panel); overflow: hidden; }
 .panel-heading { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid var(--panel-edge); }
+.service-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.service-action { min-width: 52px; padding: 5px 7px; font-size: 11px; } .service-action.danger:hover:not(:disabled) { border-color: var(--amber); color: var(--amber); }
 .state { padding: 4px 8px; border: 1px solid currentColor; border-radius: 3px; font-size: 12px; font-weight: bold; } .online { color: var(--lime); } .attention { color: var(--amber); }
 .process, .log-path { margin: 12px 16px; overflow-wrap: anywhere; }
 .clients-panel { margin: 0 16px 16px; border: 1px solid #2d443c; background: var(--terminal); }
@@ -31,4 +33,4 @@ button { padding: 8px 10px; cursor: pointer; background: #29463c; } button:hover
 .diff { max-height: 220px; margin: 12px 0 0; padding: 10px; overflow: auto; border: 1px solid #2d443c; background: var(--terminal); color: #d7f6e4; font: 12px/1.4 "DejaVu Sans Mono", monospace; white-space: pre-wrap; }
 .message { color: var(--lime); font-size: 12px; text-align: right; overflow-wrap: anywhere; } .message.error { color: var(--amber); }
 footer { padding: 0 0 24px; }
-@media (max-width: 800px) { header { align-items: start; flex-direction: column; gap: 8px; } main { grid-template-columns: 1fr; } .log { height: 46vh; } .endpoint-form { flex-wrap: wrap; } .endpoint-form input { flex-basis: 100%; } }
+@media (max-width: 800px) { header { align-items: start; flex-direction: column; gap: 8px; } main { grid-template-columns: 1fr; } .panel-heading { align-items: start; gap: 12px; } .service-actions { flex-wrap: wrap; } .log { height: 46vh; } .endpoint-form { flex-wrap: wrap; } .endpoint-form input { flex-basis: 100%; } }
