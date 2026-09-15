@@ -19,6 +19,13 @@ main { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16p
 th, td { padding: 8px 10px; text-align: left; vertical-align: top; border-bottom: 1px solid #23382f; } th { color: var(--lime); font-weight: normal; } td { max-width: 340px; overflow-wrap: anywhere; }
 .write-panel { margin: 0 16px 16px; padding: 12px; border: 1px solid #2d443c; background: var(--terminal); }
 .dfota-panel { margin: 0 16px 16px; padding: 12px; border: 1px solid #69592d; background: var(--terminal); }
+.panel-toggle { cursor: pointer; justify-content: flex-start; }
+.panel-toggle .message { margin-left: auto; }
+.panel-description { color: var(--muted); font-size: 12px; }
+.panel-toggle::before { content: ">"; display: inline-block; width: 14px; color: var(--lime); font-weight: bold; transform-origin: center; transition: transform 120ms ease; }
+.panel-toggle[aria-expanded="true"]::before { transform: rotate(90deg); }
+.panel-toggle:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+.panel-content[hidden] { display: none; }
 .write-panel h3 { margin: 0; } .write-form { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; align-items: center; } .write-form label { margin: 0; }
 .upload-form { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; margin: 0 0 12px; } .upload-form label { grid-column: 1 / -1; margin: 0; } .upload-form input { width: 100%; padding: 5px; }
 .write-form input, .write-form select, .write-form button { width: 100%; } .operation-note { margin: 12px 0 0; color: var(--muted); font-size: 12px; }

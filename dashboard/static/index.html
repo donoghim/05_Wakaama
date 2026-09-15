@@ -49,27 +49,35 @@
         </div>
       </div>
       <div class="write-panel">
-        <div class="control-heading"><h3>Queue Write</h3><span id="write-state" class="message"></span></div>
-        <div class="write-form">
-          <label for="write-endpoint">Endpoint</label><select id="write-endpoint"></select>
-          <label for="write-uri">Resource URI</label><input id="write-uri" value="/10250/0/1" spellcheck="false">
-          <label for="write-value">Value</label><input id="write-value" placeholder="Value to write" spellcheck="false">
-          <button id="queue-write" type="button">Queue Write</button>
+        <div class="control-heading panel-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="write-content">
+          <h3>Queue Write</h3><span class="panel-description">(Send data to Client)</span><span id="write-state" class="message"></span>
         </div>
-        <p class="operation-note">The request is queued through the local control socket. Check the Server log for the CoAP response.</p>
+        <div id="write-content" class="panel-content" hidden>
+          <div class="write-form">
+            <label for="write-endpoint">Endpoint</label><select id="write-endpoint"></select>
+            <label for="write-uri">Resource URI</label><input id="write-uri" value="/10250/0/1" spellcheck="false">
+            <label for="write-value">Value</label><input id="write-value" placeholder="Value to write" spellcheck="false">
+            <button id="queue-write" type="button">Queue Write</button>
+          </div>
+          <p class="operation-note">The request is queued through the local control socket. Check the Server log for the CoAP response.</p>
+        </div>
       </div>
       <div class="dfota-panel">
-        <div class="control-heading"><h3>Deploy DFOTA</h3><span id="dfota-state" class="message"></span></div>
-        <div class="upload-form">
-          <label for="firmware-upload">Upload firmware</label><input id="firmware-upload" type="file" accept=".bin,.img,.hex"><button id="upload-firmware" type="button">Upload</button>
+        <div class="control-heading panel-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="dfota-content">
+          <h3>Deploy DFOTA</h3><span id="dfota-state" class="message"></span>
         </div>
-        <div class="write-form">
-          <label for="dfota-endpoint">Endpoint</label><select id="dfota-endpoint"></select>
-          <label for="firmware-file">Approved firmware</label><select id="firmware-file"></select>
-          <label>SHA-256</label><code id="firmware-hash">Loading...</code>
-          <button id="queue-dfota" type="button">Deploy DFOTA</button>
+        <div id="dfota-content" class="panel-content" hidden>
+          <div class="upload-form">
+            <label for="firmware-upload">Upload firmware</label><input id="firmware-upload" type="file" accept=".bin,.img,.hex"><button id="upload-firmware" type="button">Upload</button>
+          </div>
+          <div class="write-form">
+            <label for="dfota-endpoint">Endpoint</label><select id="dfota-endpoint"></select>
+            <label for="firmware-file">Approved firmware</label><select id="firmware-file"></select>
+            <label>SHA-256</label><code id="firmware-hash">Loading...</code>
+            <button id="queue-dfota" type="button">Deploy DFOTA</button>
+          </div>
+          <p class="operation-note">Only artifacts in the approved local firmware directory can be deployed. Check the Server log for download and result status.</p>
         </div>
-        <p class="operation-note">Only artifacts in the approved local firmware directory can be deployed. Check the Server log for download and result status.</p>
       </div>
       <pre id="server-log" class="log" aria-live="polite">Waiting for log data...</pre>
       <p id="server-log-path" class="log-path"></p>

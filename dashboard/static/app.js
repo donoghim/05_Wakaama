@@ -221,6 +221,22 @@ document.querySelectorAll(".service-action").forEach((button) => {
   button.addEventListener("click", () => controlService(button.dataset.target, button.dataset.action));
 });
 
+document.querySelectorAll(".panel-toggle").forEach((toggle) => {
+  const content = document.getElementById(toggle.getAttribute("aria-controls"));
+  const setExpanded = (expanded) => {
+    toggle.setAttribute("aria-expanded", String(expanded));
+    content.hidden = !expanded;
+  };
+
+  const togglePanel = () => setExpanded(toggle.getAttribute("aria-expanded") !== "true");
+  toggle.addEventListener("click", togglePanel);
+  toggle.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    togglePanel();
+  });
+});
+
 loadIni().catch((error) => setIniMessage(error.message, true));
 loadFirmware().catch((error) => setDfotaMessage(error.message, true));
 
