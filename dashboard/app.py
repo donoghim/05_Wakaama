@@ -276,14 +276,56 @@ def systemd_service_active(service_name):
     return result.returncode == 0
 
 
+def systemd_service_property(service_name, property_name):
+    result = subprocess.run(
+        ["systemctl", "--user", "show", "--property={}".format(property_name), "--value", service_name],
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
+        encoding="utf-8", errors="replace", check=False)
+    if result.returncode != 0:
+        return None
+    value = result.stdout.strip()
+    return value or None
+
+
+def service_activation_time(service_name):
+    return systemd_service_property(service_name, "ActiveEnterTimestamp")
+
+
+def journal_message(entry):
+    message = entry.get("MESSAGE")
+    if isinstance(message, str):
+        return message
+    if isinstance(message, list):
+        try:
+            return bytes(message).decode("utf-8", errors="replace")
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
 def read_journal_log(service_name):
-    command = ["journalctl", "--user", "-u", service_name, "-n", "2000", "--no-pager", "-o", "cat"]
+    command = ["journalctl", "--user", "-u", service_name]
+    activation_time = service_activation_time(service_name)
+    if activation_time:
+        command.extend(["--since", activation_time])
+    invocation_id = systemd_service_property(service_name, "InvocationID")
+    if invocation_id:
+        command.append("_SYSTEMD_INVOCATION_ID={}".format(invocation_id))
+    command.extend(["--reverse", "-n", "2000", "--no-pager", "-o", "json"])
     result = subprocess.run(command,
                             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
                             encoding="utf-8", errors="replace", check=False)
     if result.returncode != 0:
         return None
-    contents = result.stdout
+    messages = []
+    for line in result.stdout.splitlines():
+        try:
+            message = journal_message(json.loads(line))
+        except (json.JSONDecodeError, TypeError):
+            continue
+        if message is not None:
+            messages.append(message)
+    contents = "\n".join(reversed(messages))
     if len(contents.encode("utf-8")) > MAX_LOG_BYTES:
         contents = contents.encode("utf-8")[-MAX_LOG_BYTES:].decode("utf-8", errors="replace")
         first_newline = contents.find("\n")

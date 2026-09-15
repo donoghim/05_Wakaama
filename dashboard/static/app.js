@@ -28,10 +28,13 @@ async function controlService(target, action) {
 
 function updateLog(name, log) {
   const element = document.getElementById(`${name}-log`);
-  const atBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 8;
-  element.textContent = log.contents || "No log output yet.";
+  const contents = log.contents || "No log output yet.";
+  if (element.textContent !== contents) {
+    const atBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 8;
+    element.textContent = contents;
+    if (atBottom) element.scrollTop = element.scrollHeight;
+  }
   document.getElementById(`${name}-log-path`).textContent = `Log: ${log.path}`;
-  if (atBottom) element.scrollTop = element.scrollHeight;
 }
 
 function updateClients(payload) {

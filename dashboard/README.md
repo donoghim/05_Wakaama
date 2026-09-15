@@ -78,6 +78,11 @@ Dashboard의 각 Server panel에는 `Start`, `Restart`, `Stop` button이 있다.
 다른 shell command는 실행하지 않는다. `Stop` 또는 `Restart` 뒤에는 device가 다시
 Bootstrap/Register해야 LwM2M Server의 registered-client table에 다시 표시된다.
 
+Service log panel은 현재 service 실행 인스턴스가 시작된 시각 이후의 journal 중 가장
+최신 2000개 항목을 조회한다. 화면에는 브라우저 부하를 제한하기 위해 그 결과의 최신
+48 KiB를 시간순으로 표시하며, binary 또는 UTF-8이 아닌 message도 대체 문자로 안전하게
+표시한다.
+
 ## 기존 tmux Pane 연결
 
 기존처럼 Bootstrap Server와 LwM2M Server를 tmux에서 실행한 상태로 유지할 수 있다.
