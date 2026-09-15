@@ -66,6 +66,23 @@ cd ~/Wakaama/05_Wakaama/run/server
 DFOTA_HOST=서버_IP LWM2M_PORT=22102 DFOTA_FILE=A02_beta_to_A02.bin ./11_server_sender_dfota.sh
 ```
 
+등록 직후 요청 방식은 실행 스크립트로 선택한다.
+
+- `./11_server_sender_dfota.sh`: 현재 모드. `/10250/0/0`, `/26241/0/0` Observe를 바로 요청한다.
+- `./12_server_commercial.sh`: 상용 모드. 서버 실행 옵션 `-C`를 추가하며 나머지 Sender/DFOTA 설정은 11번과 같다.
+
+상용 모드는 앞 요청의 응답 또는 최종 타임아웃 후 다음 요청을 아래 순서로 전송한다.
+
+```text
+/4/0/8 Read
+/4/0/0 Read
+/10250/0/0 Observe
+/26241/0/0 Observe
+/3/0/3 Read
+```
+
+LwM2M Read와 Observe는 모두 CoAP `GET`으로 전송된다. 패킷 상세에 `Observe: 0` 옵션이 있으면 Observe 등록이고, 해당 옵션이 없으면 일반 Read이다.
+
 ### 1-3. Sender 실행
 
 ```sh

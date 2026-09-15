@@ -90,6 +90,29 @@ static const char * g_dfotaFwRoot = PRV_DFOTA_FW_ROOT_DEFAULT;
 static const char * g_dfotaUriPrefix = PRV_DFOTA_URI_PREFIX_DEFAULT;
 static const char * g_dfotaHost = PRV_DFOTA_HOST_DEFAULT;
 static const char * g_localPort = LWM2M_STANDARD_PORT_STR;
+static bool g_commercialRegistrationMode = false;
+
+typedef enum
+{
+    PRV_COMMERCIAL_READ_4_0_8,
+    PRV_COMMERCIAL_READ_4_0_0,
+    PRV_COMMERCIAL_OBSERVE_10250_0_0,
+    PRV_COMMERCIAL_OBSERVE_26241_0_0,
+    PRV_COMMERCIAL_READ_3_0_3,
+    PRV_COMMERCIAL_COMPLETE
+} prv_commercial_step_t;
+
+typedef struct _prv_commercial_sequence_t
+{
+    struct _prv_commercial_sequence_t * next;
+    lwm2m_context_t * contextP;
+    uint16_t clientId;
+    prv_commercial_step_t step;
+    bool active;
+    bool dispatchPending;
+} prv_commercial_sequence_t;
+
+static prv_commercial_sequence_t * g_commercialSequences = NULL;
 
 typedef enum
 {
@@ -547,6 +570,8 @@ static bool prv_decode_single_byte_resource(uint8_t * data,
     return false;
 }
 
+static void prv_dispatch_commercial_step(prv_commercial_sequence_t * sequenceP);
+
 static void prv_result_callback(lwm2m_context_t *contextP, uint16_t clientID, lwm2m_uri_t *uriP, int status,
                                 block_info_t *block_info, lwm2m_media_type_t format, uint8_t *data, size_t dataLength,
                                 void *userData) {
@@ -651,6 +676,206 @@ static void prv_notify_callback(lwm2m_context_t *contextP, uint16_t clientID, lw
 
     fprintf(stdout, "\r\n> ");
     fflush(stdout);
+}
+
+static bool prv_commercial_step_matches(prv_commercial_sequence_t * sequenceP,
+                                        lwm2m_uri_t * uriP)
+{
+    if (sequenceP == NULL || !sequenceP->active)
+    {
+        return false;
+    }
+
+    switch (sequenceP->step)
+    {
+    case PRV_COMMERCIAL_READ_4_0_8:
+        return prv_uri_is_resource(uriP, 4, 0, 8);
+    case PRV_COMMERCIAL_READ_4_0_0:
+        return prv_uri_is_resource(uriP, 4, 0, 0);
+    case PRV_COMMERCIAL_OBSERVE_10250_0_0:
+        return prv_uri_is_resource(uriP, 10250, 0, 0);
+    case PRV_COMMERCIAL_OBSERVE_26241_0_0:
+        return prv_uri_is_resource(uriP, 26241, 0, 0);
+    case PRV_COMMERCIAL_READ_3_0_3:
+        return prv_uri_is_resource(uriP, 3, 0, 3);
+    case PRV_COMMERCIAL_COMPLETE:
+        return false;
+    default:
+        return false;
+    }
+}
+
+static void prv_advance_commercial_step(prv_commercial_sequence_t * sequenceP,
+                                        lwm2m_uri_t * uriP)
+{
+    if (!prv_commercial_step_matches(sequenceP, uriP))
+    {
+        return;
+    }
+
+    sequenceP->step++;
+    if (sequenceP->step == PRV_COMMERCIAL_COMPLETE)
+    {
+        sequenceP->active = false;
+        fprintf(stdout, "\r\nCommercial registration sequence completed for client #%d.\r\n",
+                sequenceP->clientId);
+        return;
+    }
+
+    prv_dispatch_commercial_step(sequenceP);
+}
+
+static void prv_commercial_read_callback(lwm2m_context_t *contextP, uint16_t clientID, lwm2m_uri_t *uriP, int status,
+                                         block_info_t *block_info, lwm2m_media_type_t format, uint8_t *data,
+                                         size_t dataLength, void *userData)
+{
+    prv_commercial_sequence_t * sequenceP = (prv_commercial_sequence_t *)userData;
+
+    prv_result_callback(contextP, clientID, uriP, status, block_info, format, data, dataLength, NULL);
+    prv_advance_commercial_step(sequenceP, uriP);
+}
+
+static void prv_commercial_observe_callback(lwm2m_context_t *contextP, uint16_t clientID, lwm2m_uri_t *uriP,
+                                            int count, block_info_t *block_info, lwm2m_media_type_t format,
+                                            uint8_t *data, size_t dataLength, void *userData)
+{
+    prv_commercial_sequence_t * sequenceP = (prv_commercial_sequence_t *)userData;
+
+    prv_notify_callback(contextP, clientID, uriP, count, block_info, format, data, dataLength, NULL);
+    prv_advance_commercial_step(sequenceP, uriP);
+}
+
+static void prv_dispatch_commercial_step(prv_commercial_sequence_t * sequenceP)
+{
+    static const char * const uriStrings[] = {
+        "/4/0/8",
+        "/4/0/0",
+        "/10250/0/0",
+        "/26241/0/0",
+        "/3/0/3"
+    };
+    lwm2m_uri_t uri;
+    int result;
+
+    if (sequenceP == NULL || !sequenceP->active || sequenceP->step >= PRV_COMMERCIAL_COMPLETE)
+    {
+        return;
+    }
+    sequenceP->dispatchPending = false;
+
+    if (lwm2m_stringToUri(uriStrings[sequenceP->step], strlen(uriStrings[sequenceP->step]), &uri) == 0)
+    {
+        fprintf(stderr, "Invalid commercial registration URI: %s\r\n", uriStrings[sequenceP->step]);
+        sequenceP->active = false;
+        return;
+    }
+
+    fprintf(stdout, "\r\nCommercial registration client #%d: ", sequenceP->clientId);
+    prv_printUri(&uri);
+    fprintf(stdout, "\r\n");
+
+    if (sequenceP->step == PRV_COMMERCIAL_OBSERVE_10250_0_0
+     || sequenceP->step == PRV_COMMERCIAL_OBSERVE_26241_0_0)
+    {
+        result = lwm2m_observe(sequenceP->contextP, sequenceP->clientId, &uri,
+                               prv_commercial_observe_callback, sequenceP);
+    }
+    else
+    {
+        result = lwm2m_dm_read(sequenceP->contextP, sequenceP->clientId, &uri,
+                               prv_commercial_read_callback, sequenceP);
+    }
+
+    if (result != 0)
+    {
+        prv_print_error(result);
+        sequenceP->step++;
+        if (sequenceP->step == PRV_COMMERCIAL_COMPLETE)
+        {
+            sequenceP->active = false;
+        }
+        else
+        {
+            prv_dispatch_commercial_step(sequenceP);
+        }
+    }
+}
+
+static prv_commercial_sequence_t * prv_find_commercial_sequence(uint16_t clientId)
+{
+    prv_commercial_sequence_t * sequenceP = g_commercialSequences;
+
+    while (sequenceP != NULL && sequenceP->clientId != clientId)
+    {
+        sequenceP = sequenceP->next;
+    }
+
+    return sequenceP;
+}
+
+static prv_commercial_sequence_t * prv_create_commercial_sequence(uint16_t clientId)
+{
+    prv_commercial_sequence_t * sequenceP;
+
+    sequenceP = (prv_commercial_sequence_t *)lwm2m_malloc(sizeof(*sequenceP));
+    if (sequenceP == NULL)
+    {
+        return NULL;
+    }
+    memset(sequenceP, 0, sizeof(*sequenceP));
+    sequenceP->clientId = clientId;
+    sequenceP->next = g_commercialSequences;
+    g_commercialSequences = sequenceP;
+
+    return sequenceP;
+}
+
+static void prv_start_commercial_sequence(lwm2m_context_t * contextP, uint16_t clientId)
+{
+    prv_commercial_sequence_t * previousP = prv_find_commercial_sequence(clientId);
+    prv_commercial_sequence_t * sequenceP;
+
+    if (previousP != NULL)
+    {
+        previousP->active = false;
+    }
+
+    sequenceP = prv_create_commercial_sequence(clientId);
+
+    if (sequenceP == NULL)
+    {
+        fprintf(stderr, "Unable to allocate commercial registration state for client #%d.\r\n", clientId);
+        return;
+    }
+
+    sequenceP->contextP = contextP;
+    sequenceP->step = PRV_COMMERCIAL_READ_4_0_8;
+    sequenceP->active = true;
+    sequenceP->dispatchPending = true;
+}
+
+static void prv_dispatch_pending_commercial_sequences(void)
+{
+    prv_commercial_sequence_t * sequenceP = g_commercialSequences;
+
+    while (sequenceP != NULL)
+    {
+        if (sequenceP->active && sequenceP->dispatchPending)
+        {
+            prv_dispatch_commercial_step(sequenceP);
+        }
+        sequenceP = sequenceP->next;
+    }
+}
+
+static void prv_stop_commercial_sequence(uint16_t clientId)
+{
+    prv_commercial_sequence_t * sequenceP = prv_find_commercial_sequence(clientId);
+
+    if (sequenceP != NULL)
+    {
+        sequenceP->active = false;
+    }
 }
 
 static void prv_read_client(lwm2m_context_t * lwm2mH,
@@ -1764,13 +1989,24 @@ static void prv_monitor_callback(lwm2m_context_t *lwm2mH, uint16_t clientID, lwm
         fprintf(stdout, "\r\n New client #%d registered.\r\n", clientID);
         targetP = (lwm2m_client_t *)lwm2m_list_find((lwm2m_list_t *)lwm2mH->clientList, clientID);
         prv_dump_client(targetP);
-                slwm2mCtx = lwm2mH;
-                observeObj_10250(clientID);
-                observeObj_26241(clientID);
+        if (g_commercialRegistrationMode)
+        {
+            prv_start_commercial_sequence(lwm2mH, clientID);
+        }
+        else
+        {
+            slwm2mCtx = lwm2mH;
+            observeObj_10250(clientID);
+            observeObj_26241(clientID);
+        }
         break;
 
     case COAP_202_DELETED:
         fprintf(stdout, "\r\n Client #%d unregistered.\r\n", clientID);
+        if (g_commercialRegistrationMode)
+        {
+            prv_stop_commercial_sequence(clientID);
+        }
         break;
 
     case COAP_204_CHANGED:
@@ -1815,6 +2051,7 @@ void print_usage(void)
     fprintf(stdout, "  -F DIR\tSet DFOTA firmware directory. Default: "PRV_DFOTA_FW_ROOT_DEFAULT"\r\n");
     fprintf(stdout, "  -u PATH\tSet DFOTA URI prefix. Default: "PRV_DFOTA_URI_PREFIX_DEFAULT"\r\n");
     fprintf(stdout, "  -H HOST\tSet DFOTA Package URI host/IP. Default: "PRV_DFOTA_HOST_DEFAULT"\r\n");
+    fprintf(stdout, "  -C\t\tUse commercial post-registration request sequence. Default: off\r\n");
     fprintf(stdout, "  -S BYTES\tCoAP block size. Options: 16, 32, 64, 128, 256, 512, 1024. Default: %" PRIu16 "\r\n",
             (uint16_t)LWM2M_COAP_DEFAULT_BLOCK_SIZE);
     fprintf(stdout, "\r\n");
@@ -1964,6 +2201,9 @@ int main(int argc, char *argv[])
                 return 0;
             }
             g_dfotaHost = argv[opt];
+            break;
+        case 'C':
+            g_commercialRegistrationMode = true;
             break;
         case 'S':
             opt++;
@@ -2117,6 +2357,10 @@ int main(int argc, char *argv[])
                         if (!prv_handle_dfota_request(connP, buffer, (size_t)numBytes))
                         {
                             lwm2m_handle_packet(lwm2mH, buffer, (size_t)numBytes, connP);
+                            if (g_commercialRegistrationMode)
+                            {
+                                prv_dispatch_pending_commercial_sequences();
+                            }
                         }
                     }
                 }

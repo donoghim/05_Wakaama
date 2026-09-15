@@ -68,7 +68,8 @@ WAKAAMA_SERVER_SERVICE=wakaama-server.service \
 ./dashboard/start.sh
 ```
 
-service는 현재 DFOTA launch setting을 유지한다: UDP `22102`, local control socket
+service는 `run/server/12_server_commercial.sh`를 실행하므로 상용 등록 시퀀스와
+현재 DFOTA launch setting을 함께 사용한다: UDP `22102`, local control socket
 `/tmp/lwm2mserver-control.sock`, firmware directory `dfota_fw`, URI prefix
 `/dfota_fw`, DFOTA host `115.90.109.11`. Server console input은 비활성화되므로
 client 확인, Write, DFOTA action은 dashboard에서 수행한다.
