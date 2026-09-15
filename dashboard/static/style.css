@@ -21,6 +21,7 @@ th, td { padding: 8px 10px; text-align: left; vertical-align: top; border-bottom
 .dfota-panel { margin: 0 16px 16px; padding: 12px; border: 1px solid #69592d; background: var(--terminal); }
 .panel-toggle { cursor: pointer; justify-content: flex-start; }
 .panel-toggle .message { margin-left: auto; }
+.panel-toggle h3 { margin: 0; }
 .panel-description { color: var(--muted); font-size: 12px; }
 .panel-toggle::before { content: ">"; display: inline-block; width: 14px; color: var(--lime); font-weight: bold; transform-origin: center; transition: transform 120ms ease; }
 .panel-toggle[aria-expanded="true"]::before { transform: rotate(90deg); }
@@ -31,7 +32,7 @@ th, td { padding: 8px 10px; text-align: left; vertical-align: top; border-bottom
 .write-form input, .write-form select, .write-form button { width: 100%; } .operation-note { margin: 12px 0 0; color: var(--muted); font-size: 12px; }
 code { color: var(--amber); overflow-wrap: anywhere; font: 11px/1.4 "DejaVu Sans Mono", monospace; }
 .log { height: min(65vh, 650px); margin: 0 16px; padding: 14px; overflow: auto; color: #d7f6e4; background: var(--terminal); border: 1px solid #2d443c; font: 13px/1.45 "DejaVu Sans Mono", monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
-.controls { margin-top: 16px; padding: 16px; border-top: 1px solid var(--panel-edge); }
+.controls { margin: 0 16px 16px; padding: 12px; border: 1px solid #2d443c; background: var(--terminal); }
 .control-heading { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; } h3 { margin: 0 0 12px; font-size: 16px; }
 label { display: block; margin: 12px 0 6px; color: var(--muted); font-size: 12px; }
 input, select, textarea, button { border: 1px solid #49665c; border-radius: 3px; color: var(--ink); background: var(--terminal); font: 13px "DejaVu Sans Mono", monospace; }

@@ -24,13 +24,17 @@
       <pre id="bootstrap-log" class="log" aria-live="polite">Waiting for log data...</pre>
       <p id="bootstrap-log-path" class="log-path"></p>
       <div class="controls">
-        <div class="control-heading"><h3>Bootstrap Configuration</h3><span id="ini-state" class="message"></span></div>
-        <label for="endpoint-name">Add EPNS</label>
-        <div class="endpoint-form"><input id="endpoint-name" autocomplete="off" placeholder="Endpoint name"><select id="server-id"></select><button id="add-endpoint" type="button">Add</button></div>
-        <label for="ini-editor">Managed INI</label>
-        <textarea id="ini-editor" spellcheck="false" aria-label="Bootstrap INI editor"></textarea>
-        <div class="button-row"><button id="preview-ini" type="button">Preview changes</button><button id="save-ini" type="button">Save backup + apply</button><button id="restart-bootstrap" type="button">Restart Bootstrap</button></div>
-        <pre id="ini-diff" class="diff">No pending changes.</pre>
+        <div class="control-heading panel-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="bootstrap-content">
+          <h3>Bootstrap Configuration</h3><span id="ini-state" class="message"></span>
+        </div>
+        <div id="bootstrap-content" class="panel-content" hidden>
+          <label for="endpoint-name">Add EPNS</label>
+          <div class="endpoint-form"><input id="endpoint-name" autocomplete="off" placeholder="Endpoint name"><select id="server-id"></select><button id="add-endpoint" type="button">Add</button></div>
+          <label for="ini-editor">Managed INI</label>
+          <textarea id="ini-editor" spellcheck="false" aria-label="Bootstrap INI editor"></textarea>
+          <div class="button-row"><button id="preview-ini" type="button">Preview changes</button><button id="save-ini" type="button">Save backup + apply</button><button id="restart-bootstrap" type="button">Restart Bootstrap</button></div>
+          <pre id="ini-diff" class="diff">No pending changes.</pre>
+        </div>
       </div>
     </section>
     <section class="service-panel" aria-labelledby="server-title">
