@@ -63,6 +63,8 @@ def capture_tmux_log(markers):
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             check=False,
         )
     except FileNotFoundError:
@@ -74,6 +76,8 @@ def capture_tmux_log(markers):
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             check=False,
         )
         if any(marker in output.stdout for marker in markers):
@@ -273,14 +277,10 @@ def systemd_service_active(service_name):
 
 
 def read_journal_log(service_name):
-    activation = subprocess.run(["systemctl", "--user", "show", "--property=ActiveEnterTimestamp", "--value", service_name],
-                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, check=False)
-    since = activation.stdout.strip()
     command = ["journalctl", "--user", "-u", service_name, "-n", "2000", "--no-pager", "-o", "cat"]
-    if since:
-        command.extend(["--since", since])
     result = subprocess.run(command,
-                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, check=False)
+                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True,
+                            encoding="utf-8", errors="replace", check=False)
     if result.returncode != 0:
         return None
     contents = result.stdout
