@@ -332,6 +332,15 @@ systemctl --user stop wakaama-bootstrap.service
 systemctl --user stop wakaama-server.service
 ```
 
+Dashboard 화면의 `Bootstrap Server`와 `LwM2M Server` 로그는 각각
+`wakaama-bootstrap.service`와 `wakaama-server.service`의 systemd journal을 우선 표시한다.
+Dashboard는 약 1.5초마다 로그 API를 다시 요청하므로 브라우저를 새로고침하지 않아도 새 로그가 반영된다.
+화면 아래의 `Log: systemd journal ...` 문구로 현재 출처를 확인할 수 있다.
+
+각 service가 실행 중이 아니거나 journal을 읽을 수 없으면 설정된 로그 파일을 먼저 확인하고,
+그 파일도 사용할 수 없을 때 관련 tmux pane을 fallback으로 표시한다. 따라서 `Log: tmux pane ...`이
+보이면 해당 화면은 journal이 아니라 tmux 출력을 표시하는 상태다.
+
 로그인 시 자동 시작을 원하면 다음을 실행한다.
 
 ```sh
