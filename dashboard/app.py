@@ -276,14 +276,19 @@ def read_journal_log(service_name):
     activation = subprocess.run(["systemctl", "--user", "show", "--property=ActiveEnterTimestamp", "--value", service_name],
                                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, check=False)
     since = activation.stdout.strip()
-    command = ["journalctl", "--user", "-u", service_name, "-n", "500", "--no-pager", "-o", "cat"]
+    command = ["journalctl", "--user", "-u", service_name, "-n", "2000", "--no-pager", "-o", "cat"]
     if since:
         command.extend(["--since", since])
     result = subprocess.run(command,
                             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, check=False)
     if result.returncode != 0:
         return None
-    return {"path": "systemd journal {}".format(service_name), "available": True, "contents": result.stdout}
+    contents = result.stdout
+    if len(contents.encode("utf-8")) > MAX_LOG_BYTES:
+        contents = contents.encode("utf-8")[-MAX_LOG_BYTES:].decode("utf-8", errors="replace")
+        first_newline = contents.find("\n")
+        contents = contents[first_newline + 1:] if first_newline >= 0 else contents
+    return {"path": "systemd journal {}".format(service_name), "available": True, "contents": contents}
 
 
 def parse_bootstrap_ini(contents):
