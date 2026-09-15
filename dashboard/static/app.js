@@ -52,7 +52,7 @@ function updateClients(payload) {
     const row = document.createElement("tr");
     [client.id, client.name, client.binding, client.lifetime, client.objects].forEach((value) => {
       const cell = document.createElement("td");
-      cell.textContent = value || "-";
+      cell.textContent = value === "" || value === null || value === undefined ? "-" : value;
       row.appendChild(cell);
     });
     body.appendChild(row);
