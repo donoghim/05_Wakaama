@@ -45,7 +45,7 @@ function updateClients(payload) {
   if (!payload.clients.length) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
-    cell.colSpan = 5;
+    cell.colSpan = 6;
     cell.textContent = "No registered client blocks found in the current server output.";
     row.appendChild(cell);
     body.appendChild(row);
@@ -53,7 +53,7 @@ function updateClients(payload) {
   }
   payload.clients.forEach((client) => {
     const row = document.createElement("tr");
-    [client.id, client.name, client.binding, client.lifetime, client.objects].forEach((value) => {
+    [client.id, client.name, client.model, client.binding, client.lifetime, client.objects].forEach((value) => {
       const cell = document.createElement("td");
       cell.textContent = value === "" || value === null || value === undefined ? "-" : value;
       row.appendChild(cell);

@@ -99,13 +99,18 @@ def read_service_log(path, tmux_marker, systemd_service=""):
 
 def parse_registered_clients(contents):
     clients = {}
+    models = {}
     client = None
     for line in contents.splitlines():
+        model = re.match(r'^\s*Client #(\d+) model: "(.*)"\s*$', line)
+        if model:
+            models[int(model.group(1))] = model.group(2)
+            continue
         header = re.match(r"^\s*Client #(\d+):\s*$", line)
         if header:
             if client and client["name"]:
                 clients[client["id"]] = client
-            client = {"id": int(header.group(1)), "name": "", "version": "", "binding": "", "lifetime": "", "objects": ""}
+            client = {"id": int(header.group(1)), "name": "", "version": "", "binding": "", "lifetime": "", "model": "", "objects": ""}
             continue
         if client is None:
             continue
@@ -118,7 +123,26 @@ def parse_registered_clients(contents):
             client["objects"] = "{}, {}".format(client["objects"], line.strip().rstrip(","))
     if client and client["name"]:
         clients[client["id"]] = client
+    for client_id, model in models.items():
+        if client_id in clients:
+            clients[client_id]["model"] = model
     return sorted(clients.values(), key=lambda client: client["id"])
+
+
+def binding_label(value):
+    try:
+        binding = int(value)
+    except (TypeError, ValueError):
+        return str(value)
+
+    labels = []
+    for flag, label in ((0x02, "UDP"), (0x04, "TCP"), (0x08, "SMS"),
+                        (0x10, "Non-IP"), (0x20, "Queue")):
+        if binding & flag:
+            labels.append(label)
+    if labels:
+        return ", ".join(labels)
+    return "Not specified" if binding & 0x01 else str(value)
 
 
 def request_control_list():
@@ -145,10 +169,11 @@ def request_control_list():
     clients = []
     for line in response.splitlines():
         fields = line.split("\t")
-        if len(fields) != 5 or not fields[0].isdigit():
+        if len(fields) not in (5, 6) or not fields[0].isdigit():
             continue
         clients.append({"id": int(fields[0]), "name": fields[1], "version": fields[2],
-                        "binding": fields[3], "lifetime": "{} sec".format(fields[4]), "objects": ""})
+                        "binding": binding_label(fields[3]), "lifetime": "{} sec".format(fields[4]),
+                        "model": fields[5] if len(fields) == 6 else "", "objects": ""})
     return sorted(clients, key=lambda client: client["id"])
 
 

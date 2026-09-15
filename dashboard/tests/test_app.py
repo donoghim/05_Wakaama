@@ -65,5 +65,53 @@ class JournalLogTest(unittest.TestCase):
         self.assertIsNone(app.read_journal_log("wakaama-server.service"))
 
 
+class RegisteredClientsTest(unittest.TestCase):
+    def test_parses_model_from_server_log(self):
+        contents = '''
+Client #0:
+    name: "endpoint-01"
+    version: "1.1"
+    binding: "UDP"
+    lifetime: 7200 sec
+    objects: /3/0, /4/0,
+Client #0 model: "BC95GVBAR02A02_LG_BETA260611"
+'''
+
+        clients = app.parse_registered_clients(contents)
+
+        self.assertEqual("BC95GVBAR02A02_LG_BETA260611", clients[0]["model"])
+
+    @patch("app.socket.socket")
+    @patch("app.tempfile.mkstemp")
+    def test_control_list_accepts_model_field(self, mkstemp, socket_factory):
+        mkstemp.return_value = (10, "/tmp/wakaama-dashboard-test")
+        client_socket = socket_factory.return_value
+        client_socket.recv.return_value = b"0\tendpoint-01\t1.1\t3\t7200\tBC95GVBAR02A02\n"
+
+        with patch("app.os.close"), patch("app.os.unlink"):
+            clients = app.request_control_list()
+
+        self.assertEqual("BC95GVBAR02A02", clients[0]["model"])
+        self.assertEqual("UDP", clients[0]["binding"])
+
+    @patch("app.socket.socket")
+    @patch("app.tempfile.mkstemp")
+    def test_control_list_keeps_legacy_five_field_response(self, mkstemp, socket_factory):
+        mkstemp.return_value = (10, "/tmp/wakaama-dashboard-test")
+        client_socket = socket_factory.return_value
+        client_socket.recv.return_value = b"0\tendpoint-01\t1.1\t3\t7200\n"
+
+        with patch("app.os.close"), patch("app.os.unlink"):
+            clients = app.request_control_list()
+
+        self.assertEqual("", clients[0]["model"])
+
+    def test_binding_labels_ignore_unknown_bit_when_transport_is_present(self):
+        self.assertEqual("Not specified", app.binding_label("1"))
+        self.assertEqual("UDP", app.binding_label("3"))
+        self.assertEqual("UDP, Queue", app.binding_label("35"))
+        self.assertEqual("custom", app.binding_label("custom"))
+
+
 if __name__ == "__main__":
     unittest.main()

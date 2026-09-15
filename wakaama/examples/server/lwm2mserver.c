@@ -85,6 +85,7 @@
 #define PRV_DFOTA_FW_ROOT_DEFAULT "dfota_fw"
 #define PRV_DFOTA_URI_PREFIX_DEFAULT "/dfota_fw"
 #define PRV_DFOTA_HOST_DEFAULT "115.90.109.11"
+#define PRV_MODEL_NUMBER_MAX_LEN 128
 
 static const char * g_dfotaFwRoot = PRV_DFOTA_FW_ROOT_DEFAULT;
 static const char * g_dfotaUriPrefix = PRV_DFOTA_URI_PREFIX_DEFAULT;
@@ -110,6 +111,7 @@ typedef struct _prv_commercial_sequence_t
     prv_commercial_step_t step;
     bool active;
     bool dispatchPending;
+    char modelNumber[PRV_MODEL_NUMBER_MAX_LEN];
 } prv_commercial_sequence_t;
 
 static prv_commercial_sequence_t * g_commercialSequences = NULL;
@@ -730,6 +732,35 @@ static void prv_commercial_read_callback(lwm2m_context_t *contextP, uint16_t cli
                                          size_t dataLength, void *userData)
 {
     prv_commercial_sequence_t * sequenceP = (prv_commercial_sequence_t *)userData;
+
+    if (status == COAP_205_CONTENT && prv_uri_is_resource(uriP, 3, 0, 3))
+    {
+        lwm2m_data_t * dataP = NULL;
+        int count = lwm2m_data_parse(uriP, data, dataLength, format, &dataP);
+
+        if (count == 1 && (dataP[0].type == LWM2M_TYPE_STRING || dataP[0].type == LWM2M_TYPE_OPAQUE))
+        {
+            size_t index;
+            size_t length = MIN(dataP[0].value.asBuffer.length, sizeof(sequenceP->modelNumber) - 1);
+
+            memcpy(sequenceP->modelNumber, dataP[0].value.asBuffer.buffer, length);
+            sequenceP->modelNumber[length] = 0;
+            for (index = 0; index < length; index++)
+            {
+                if (sequenceP->modelNumber[index] == '\t'
+                 || sequenceP->modelNumber[index] == '\r'
+                 || sequenceP->modelNumber[index] == '\n')
+                {
+                    sequenceP->modelNumber[index] = ' ';
+                }
+            }
+            fprintf(stdout, "\r\nClient #%d model: \"%s\"\r\n", clientID, sequenceP->modelNumber);
+        }
+        if (dataP != NULL)
+        {
+            lwm2m_data_free(count, dataP);
+        }
+    }
 
     prv_result_callback(contextP, clientID, uriP, status, block_info, format, data, dataLength, NULL);
     prv_advance_commercial_step(sequenceP, uriP);
@@ -1408,9 +1439,12 @@ static void prv_handle_control_request(lwm2m_context_t *lwm2mH, int socket_fd)
         response[0] = '\0';
         for (clientP = lwm2mH->clientList; clientP != NULL; clientP = clientP->next)
         {
+            prv_commercial_sequence_t * sequenceP = prv_find_commercial_sequence(clientP->internalID);
+            const char * modelNumber = sequenceP == NULL ? "" : sequenceP->modelNumber;
             int written = snprintf(response + response_length, sizeof(response) - response_length,
-                                   "%u\t%s\t%s\t%u\t%d\n", clientP->internalID, clientP->name,
-                                   prv_dump_version(clientP->version), clientP->binding, clientP->lifetime);
+                                   "%u\t%s\t%s\t%u\t%d\t%s\n", clientP->internalID, clientP->name,
+                                   prv_dump_version(clientP->version), clientP->binding, clientP->lifetime,
+                                   modelNumber);
             if (written < 0 || (size_t)written >= sizeof(response) - response_length)
             {
                 fprintf(stderr, "Control LIST response is too long.\r\n");
