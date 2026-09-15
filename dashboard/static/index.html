@@ -60,6 +60,9 @@
       </div>
       <div class="dfota-panel">
         <div class="control-heading"><h3>Deploy DFOTA</h3><span id="dfota-state" class="message"></span></div>
+        <div class="upload-form">
+          <label for="firmware-upload">Upload firmware</label><input id="firmware-upload" type="file" accept=".bin,.img,.hex"><button id="upload-firmware" type="button">Upload</button>
+        </div>
         <div class="write-form">
           <label for="dfota-endpoint">Endpoint</label><select id="dfota-endpoint"></select>
           <label for="firmware-file">Approved firmware</label><select id="firmware-file"></select>

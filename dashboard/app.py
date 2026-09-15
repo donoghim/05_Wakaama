@@ -8,6 +8,7 @@ import socket
 import subprocess
 import tempfile
 import hashlib
+import cgi
 from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -28,6 +29,8 @@ BOOTSTRAP_LOG = Path(os.environ.get("WAKAAMA_BOOTSTRAP_LOG", DEFAULT_LOG_DIR / "
 SERVER_LOG = Path(os.environ.get("WAKAAMA_SERVER_LOG", DEFAULT_LOG_DIR / "server.log"))
 CONTROL_SOCKET = os.environ.get("WAKAAMA_CONTROL_SOCKET", "/tmp/lwm2mserver-control.sock")
 DFOTA_FIRMWARE_DIR = Path(os.environ.get("WAKAAMA_DFOTA_FIRMWARE_DIR", PROJECT_DIR / "run" / "server" / "dfota_fw"))
+MAX_FIRMWARE_BYTES = 64 * 1024 * 1024
+ALLOWED_FIRMWARE_SUFFIXES = (".bin", ".img", ".hex")
 MAX_LOG_BYTES = 48 * 1024
 LISTEN_HOST = os.environ.get("WAKAAMA_DASHBOARD_HOST", "127.0.0.1")
 LISTEN_PORT = int(os.environ.get("WAKAAMA_DASHBOARD_PORT", "8080"))
@@ -190,12 +193,55 @@ def firmware_catalog():
         resolved = path.resolve()
         if not path.is_file() or resolved.parent != firmware_dir:
             continue
-        digest = hashlib.sha256()
-        with resolved.open("rb") as firmware_file:
-            for chunk in iter(lambda: firmware_file.read(64 * 1024), b""):
-                digest.update(chunk)
-        artifacts.append({"name": path.name, "size": resolved.stat().st_size, "sha256": digest.hexdigest()})
+        artifacts.append(firmware_metadata(resolved))
     return {"directory": str(firmware_dir), "artifacts": artifacts}
+
+
+def firmware_metadata(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as firmware_file:
+        for chunk in iter(lambda: firmware_file.read(64 * 1024), b""):
+            digest.update(chunk)
+    return {"name": path.name, "size": path.stat().st_size, "sha256": digest.hexdigest()}
+
+
+def upload_firmware(file_item):
+    firmware_dir = DFOTA_FIRMWARE_DIR.resolve()
+    if not firmware_dir.is_dir():
+        raise ValueError("Firmware directory is unavailable: {}".format(firmware_dir))
+    filename = file_item.filename or ""
+    if Path(filename).name != filename or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}", filename):
+        raise ValueError("Invalid firmware file name")
+    if Path(filename).suffix.lower() not in ALLOWED_FIRMWARE_SUFFIXES:
+        raise ValueError("Firmware file must use one of: {}".format(", ".join(ALLOWED_FIRMWARE_SUFFIXES)))
+    destination = firmware_dir / filename
+    if destination.exists():
+        raise ValueError("Firmware file already exists: {}".format(filename))
+
+    file_descriptor, temporary_path = tempfile.mkstemp(prefix=".upload-", suffix=".tmp", dir=str(firmware_dir))
+    size = 0
+    try:
+        with os.fdopen(file_descriptor, "wb") as temporary_file:
+            while True:
+                chunk = file_item.file.read(64 * 1024)
+                if not chunk:
+                    break
+                size += len(chunk)
+                if size > MAX_FIRMWARE_BYTES:
+                    raise ValueError("Firmware file exceeds the 64 MiB limit")
+                temporary_file.write(chunk)
+            if size == 0:
+                raise ValueError("Firmware file is empty")
+            temporary_file.flush()
+            os.fsync(temporary_file.fileno())
+        os.replace(temporary_path, destination)
+    except Exception:
+        try:
+            os.unlink(temporary_path)
+        except FileNotFoundError:
+            pass
+        raise
+    return firmware_metadata(destination)
 
 
 def queue_dfota(endpoint_name, filename):
@@ -441,6 +487,12 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path = urlparse(self.path).path
+        if path == "/api/firmware/upload":
+            try:
+                self.send_json(upload_firmware(self.read_firmware_upload()), HTTPStatus.CREATED)
+            except (OSError, ValueError) as error:
+                self.send_json({"error": str(error)}, HTTPStatus.BAD_REQUEST)
+            return
         if path.startswith("/api/services/"):
             parts = path.split("/")
             if len(parts) != 5:
@@ -477,6 +529,19 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         if content_length <= 0 or content_length > 512 * 1024:
             raise ValueError("Request body must be between 1 and 524288 bytes")
         return json.loads(self.rfile.read(content_length).decode("utf-8"))
+
+    def read_firmware_upload(self):
+        content_length = int(self.headers.get("Content-Length", "0"))
+        if content_length <= 0 or content_length > MAX_FIRMWARE_BYTES + 1024 * 1024:
+            raise ValueError("Upload must be between 1 byte and 64 MiB")
+        content_type = self.headers.get("Content-Type", "")
+        if not content_type.startswith("multipart/form-data"):
+            raise ValueError("Firmware upload must use multipart/form-data")
+        form = cgi.FieldStorage(fp=self.rfile, headers=self.headers,
+                                environ={"REQUEST_METHOD": "POST", "CONTENT_TYPE": content_type})
+        if "firmware" not in form or not getattr(form["firmware"], "file", None):
+            raise ValueError("Firmware upload field is missing")
+        return form["firmware"]
 
     def send_json(self, payload, status=HTTPStatus.OK):
         body = json.dumps(payload).encode("utf-8")

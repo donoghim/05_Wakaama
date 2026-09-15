@@ -94,6 +94,23 @@ async function loadFirmware() {
   updateFirmwareHash();
 }
 
+async function uploadFirmware() {
+  const input = document.getElementById("firmware-upload");
+  const file = input.files[0];
+  if (!file) { setDfotaMessage("Select a firmware file to upload.", true); return; }
+  const form = new FormData();
+  form.append("firmware", file, file.name);
+  setDfotaMessage(`Uploading ${file.name}...`);
+  const response = await fetch("/api/firmware/upload", { method: "POST", body: form });
+  const payload = await response.json();
+  if (!response.ok) { setDfotaMessage(payload.error, true); return; }
+  input.value = "";
+  await loadFirmware();
+  document.getElementById("firmware-file").value = payload.name;
+  updateFirmwareHash();
+  setDfotaMessage(`Uploaded ${payload.name} (${payload.size} bytes).`);
+}
+
 async function refresh() {
   const marker = document.getElementById("refresh-status");
   try {
@@ -188,6 +205,7 @@ document.getElementById("queue-write").addEventListener("click", async () => {
 });
 
 document.getElementById("firmware-file").addEventListener("change", updateFirmwareHash);
+document.getElementById("upload-firmware").addEventListener("click", uploadFirmware);
 document.getElementById("queue-dfota").addEventListener("click", async () => {
   const endpoint = document.getElementById("dfota-endpoint").value;
   const filename = document.getElementById("firmware-file").value;

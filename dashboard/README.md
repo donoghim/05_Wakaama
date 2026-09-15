@@ -110,8 +110,10 @@ socket path를 사용하려면 dashboard 시작 전 `WAKAAMA_CONTROL_SOCKET`을 
 
 ## DFOTA Queue
 
-dashboard는 기본적으로 `run/server/dfota_fw/` 바로 아래의 regular file을 목록으로 표시하고
-선택한 artifact의 SHA-256을 보여준다. 현재 등록된 endpoint에 대해 목록에 있는 file만 local
+dashboard에서 `.bin`, `.img`, `.hex` firmware file을 upload하면 `run/server/dfota_fw/`에 atomic 저장되고
+DFOTA 목록에 바로 추가된다. file name은 영문/숫자/`.`/`_`/`-`만 허용하며 최대 크기는 64 MiB다.
+동일한 file name은 기존 artifact 보호를 위해 upload할 수 없다. dashboard는 기본적으로 이 directory 바로
+아래의 regular file을 목록으로 표시하고 선택한 artifact의 SHA-256을 보여준다. 현재 등록된 endpoint에 대해 목록에 있는 file만 local
 `DFOTA` control request로 queue한다. 새 control request를 사용하려면 workspace rebuild 뒤
 `lwm2mserver`를 restart해야 한다. device download/result sequence는 Server log에
 asynchronous하게 표시된다.
