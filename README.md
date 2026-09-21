@@ -13,8 +13,10 @@ Eclipse Wakaama(LwM2M) 기반의 Bootstrap Server / LwM2M Server / 예제 Client
 2. [사전 준비물](#사전-준비물)
 3. [빌드 (make 하는 법)](#빌드-make-하는-법)
 4. [시작하는 방법](#시작하는-방법)
-5. [Local Dashboard와 systemd 운영](#local-dashboard와-systemd-운영)
-6. [세부 사용법](#세부-사용법)
+5. [Dashboard Managed 운영](#dashboard-managed-운영)
+6. [Docker 웹 운영](#docker-웹-운영)
+7. [Local Dashboard와 systemd 운영](#local-dashboard와-systemd-운영)
+8. [세부 사용법](#세부-사용법)
    - [Bootstrap Server 콘솔](#bootstrap-server-콘솔)
    - [EPNS 등록 설정](#epns-등록-설정)
    - [Lifetime 설정](#lifetime-설정)
@@ -23,8 +25,8 @@ Eclipse Wakaama(LwM2M) 기반의 Bootstrap Server / LwM2M Server / 예제 Client
    - [Sender로 주기적으로 write 하는 법](#sender로-주기적으로-write-하는-법)
    - [DFOTA 하는 법](#dfota-하는-법)
    - [로그 / 디버그 출력](#로그--디버그-출력)
-7. [트러블슈팅](#트러블슈팅)
-8. [자주 확인할 것](#자주-확인할-것)
+9. [트러블슈팅](#트러블슈팅)
+10. [자주 확인할 것](#자주-확인할-것)
 
 ## 디렉터리 구조
 
@@ -215,6 +217,44 @@ cd ~/Wakaama/05_Wakaama/07_sender
 ```
 
 자세한 내용은 [Sender로 주기적으로 write 하는 법](#sender로-주기적으로-write-하는-법) 참고.
+
+## Dashboard Managed 운영
+
+systemd 없이 Dashboard가 Bootstrap Server와 LwM2M Server를 직접 관리하는 웹 운영 방식이다.
+기존 terminal/tmux server와 같은 UDP 포트를 사용하므로 먼저 기존 server를 종료한다.
+
+```sh
+cd ~/Wakaama/05_Wakaama
+./run/dashboard/01_dashboard_managed_start.sh
+```
+
+브라우저에서 `http://127.0.0.1:8080`을 연 뒤 두 Server의 `Start` 버튼을 누른다.
+Dashboard에서 시작한 process만 `Stop`/`Restart` 버튼으로 제어하며, Dashboard 종료 시 두 process도
+함께 종료된다. 상태 API는 root의 helper로 확인할 수 있다.
+
+```sh
+./show_api_status.sh
+```
+
+`lifetime` 또는 endpoint를 수정하면 Dashboard에서 Bootstrap INI를 저장하고 `Restart Bootstrap`을
+누른다. 변경값은 device가 다음 bootstrap을 수행할 때 적용된다. interactive console 및 packet 분석은
+기존 terminal/tmux 방식으로 수행한다.
+
+## Docker 웹 운영
+
+Docker는 systemd 없이 위 Dashboard Managed 방식을 단일 container로 실행한다. container 시작 후에는
+Dashboard만 실행되며, browser의 `Start` 버튼으로 Bootstrap Server와 LwM2M Server를 시작한다.
+설정, endpoint, firmware, backup, 로그는 image 밖의 `docker-data/`에 유지된다.
+
+```sh
+cd ~/Wakaama/05_Wakaama
+cp .env.example .env
+# .env에서 PUBLIC_ENDPOINT, DFOTA_HOST를 실제 device 접근 주소로 변경한다.
+docker compose up -d --build
+```
+
+자세한 ports, persistent data, 권한, 운영 명령은 [docker/README.md](docker/README.md)를 참고한다.
+Docker가 UDP `22101`과 `22102`를 사용 중일 때에는 local console/tmux/systemd server를 동시에 실행하지 않는다.
 
 ## Local Dashboard와 systemd 운영
 

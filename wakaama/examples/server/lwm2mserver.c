@@ -2106,6 +2106,8 @@ int main(int argc, char *argv[])
     const char * controlSocketPath = PRV_CONTROL_SOCKET_DEFAULT;
     prv_input_state_t inputState = {0};
 
+    setvbuf(stdout, NULL, _IOLBF, 0);
+    setvbuf(stderr, NULL, _IOLBF, 0);
     command_desc_t commands[] =
     {
             {"list", "List registered clients.", NULL, prv_output_clients, NULL},

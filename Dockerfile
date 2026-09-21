@@ -14,6 +14,7 @@ FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gettext-base \
+    gosu \
     procps \
     python3 \
     && rm -rf /var/lib/apt/lists/*
@@ -23,7 +24,7 @@ COPY --from=builder /src/build/bootstrap_server/bootstrap_server /app/bin/bootst
 COPY --from=builder /src/build/server/lwm2mserver /app/bin/lwm2mserver
 COPY dashboard /app/dashboard
 COPY docker/start-dashboard.sh /app/bin/start-dashboard
-COPY docker/01_bs_plain.ini.template /app/defaults/01_bs_plain.ini.template
+COPY run/bootstrap_server/01_bs_plain.ini /app/defaults/01_bs_plain.ini
 
 RUN chmod 0755 /app/bin/start-dashboard
 

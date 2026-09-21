@@ -540,7 +540,7 @@ def start_managed_service(target):
         if target == "server":
             Path(CONTROL_SOCKET).parent.mkdir(parents=True, exist_ok=True)
             DFOTA_FIRMWARE_DIR.mkdir(parents=True, exist_ok=True)
-        with log_path.open("ab", buffering=0) as log_file:
+        with log_path.open("wb", buffering=0) as log_file:
             process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=log_file,
                                        stderr=subprocess.STDOUT, start_new_session=True)
         MANAGED_PROCESSES[target] = process

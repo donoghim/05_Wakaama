@@ -576,6 +576,8 @@ int main(int argc, char *argv[])
         COMMAND_END_LIST
     };
 
+    setvbuf(stdout, NULL, _IOLBF, 0);
+    setvbuf(stderr, NULL, _IOLBF, 0);
     memset(&data, 0, sizeof(internal_data_t));
 
     data.addressFamily = AF_INET6;
