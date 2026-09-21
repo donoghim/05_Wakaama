@@ -1,9 +1,10 @@
 import json
+import subprocess
 import sys
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -111,6 +112,62 @@ Client #0 model: "BC95GVBAR02A02_LG_BETA260611"
         self.assertEqual("UDP", app.binding_label("3"))
         self.assertEqual("UDP, Queue", app.binding_label("35"))
         self.assertEqual("custom", app.binding_label("custom"))
+
+
+class ManagedRuntimeTest(unittest.TestCase):
+    def setUp(self):
+        self.previous_mode = app.RUNTIME_MODE
+        app.RUNTIME_MODE = "managed"
+        app.MANAGED_PROCESSES.clear()
+
+    def tearDown(self):
+        app.RUNTIME_MODE = self.previous_mode
+        app.MANAGED_PROCESSES.clear()
+
+    @patch("app.process_status", return_value={"running": False, "processes": []})
+    @patch("app.os.access", return_value=True)
+    @patch("app.Path.is_file", return_value=True)
+    @patch("app.subprocess.Popen")
+    def test_starts_bootstrap_with_managed_command(self, popen, is_file, access, process_status):
+        process = MagicMock()
+        process.pid = 4321
+        process.poll.return_value = None
+        popen.return_value = process
+
+        result = app.control_service("bootstrap", "start")
+
+        self.assertEqual({"target": "bootstrap", "action": "start", "active": True,
+                          "pid": 4321, "manager": "dashboard"}, result)
+        command = popen.call_args.args[0]
+        self.assertEqual([app.BOOTSTRAP_BINARY, "-4", "-l", str(app.BOOTSTRAP_PORT),
+                          "-f", str(app.BOOTSTRAP_INI)], command)
+        self.assertEqual(subprocess.DEVNULL, popen.call_args.kwargs["stdin"])
+        self.assertTrue(popen.call_args.kwargs["start_new_session"])
+
+    @patch("app.process_status", return_value={"running": False, "processes": []})
+    @patch("app.os.access", return_value=True)
+    @patch("app.Path.is_file", return_value=True)
+    @patch("app.subprocess.Popen")
+    def test_restarts_managed_server(self, popen, is_file, access, process_status):
+        existing = MagicMock()
+        existing.poll.return_value = None
+        app.MANAGED_PROCESSES["server"] = existing
+        replacement = MagicMock()
+        replacement.pid = 4322
+        replacement.poll.return_value = None
+        popen.return_value = replacement
+
+        result = app.control_service("server", "restart")
+
+        existing.send_signal.assert_called_once_with(app.signal.SIGINT)
+        existing.wait.assert_called_once_with(timeout=10)
+        self.assertEqual(4322, result["pid"])
+
+    def test_does_not_stop_process_not_started_by_dashboard(self):
+        result = app.control_service("bootstrap", "stop")
+
+        self.assertTrue(result["already_stopped"])
+        self.assertFalse(result["active"])
 
 
 if __name__ == "__main__":

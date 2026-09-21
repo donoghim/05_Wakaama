@@ -1,0 +1,10 @@
+# Docker-managed bootstrap configuration. It is created only once in /data.
+# Use the dashboard to add endpoints or adjust this file directly, then restart
+# Bootstrap Server from the dashboard.
+
+[Server]
+id=101
+uri=coap://${PUBLIC_ENDPOINT}:${PUBLIC_LWM2M_PORT}
+bootstrap=no
+lifetime=${BOOTSTRAP_LIFETIME}
+security=NoSec

@@ -35,6 +35,34 @@ WAKAAMA_DASHBOARD_HOST=0.0.0.0 ./dashboard/start.sh
 또는 `run/dashboard/00_dashboard_start.sh`를 사용하면 기본적으로 모든 interface에 bind하고,
 장비에 172.x address가 있으면 해당 URL을 안내한다.
 
+## Systemd 없이 Dashboard가 서버를 관리하는 방식
+
+`run/dashboard/01_dashboard_managed_start.sh`는 systemd나 tmux 없이 Dashboard만 먼저
+시작한다. Browser에서 Bootstrap Server와 LwM2M Server의 `Start` 버튼을 누르면 dashboard가
+허용된 실행 파일만 직접 시작하고, `Stop`/`Restart` 버튼도 같은 process를 제어한다.
+
+```bash
+cd ~/Wakaama/05_Wakaama
+# UDP 22101/22102를 사용하는 기존 user service 또는 tmux server를 먼저 중지한다.
+./run/dashboard/01_dashboard_managed_start.sh
+```
+
+기본 경로는 기존 build, INI, log, firmware directory를 사용한다. 필요한 경우 아래 환경변수로
+테스트 포트와 경로를 바꿀 수 있다.
+
+```bash
+WAKAAMA_DASHBOARD_PORT=8081 \
+WAKAAMA_BOOTSTRAP_PORT=22111 \
+WAKAAMA_LWM2M_PORT=22112 \
+./run/dashboard/01_dashboard_managed_start.sh
+```
+
+Bootstrap INI를 저장하거나 endpoint/lifetime을 변경한 뒤에는 Dashboard의 `Restart Bootstrap`
+버튼을 누른다. Bootstrap Server는 시작 시에만 INI를 읽으므로 이미 provision된 device에는
+재-bootstrap 또는 재기동이 필요하다. Dashboard를 종료하면 dashboard가 시작한 두 server도
+SIGINT로 정리한다. 이 모드는 interactive server console을 제공하지 않으므로 protocol debugging은
+기존 terminal/tmux 실행 방식을 사용한다.
+
 ## Bootstrap INI 관리
 
 dashboard는 기본적으로 `run/bootstrap_server/01_bs_plain.ini`를 관리한다. Server ID와

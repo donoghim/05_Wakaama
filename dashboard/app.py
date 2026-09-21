@@ -9,6 +9,8 @@ import subprocess
 import tempfile
 import hashlib
 import cgi
+import signal
+import threading
 from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -21,7 +23,7 @@ STATIC_DIR = BASE_DIR / "static"
 DEFAULT_LOG_DIR = BASE_DIR / "logs"
 DEFAULT_BOOTSTRAP_INI = PROJECT_DIR / "run" / "bootstrap_server" / "01_bs_plain.ini"
 BOOTSTRAP_INI = Path(os.environ.get("WAKAAMA_BOOTSTRAP_INI", DEFAULT_BOOTSTRAP_INI))
-BACKUP_DIR = BASE_DIR / "backups"
+BACKUP_DIR = Path(os.environ.get("WAKAAMA_BACKUP_DIR", BASE_DIR / "backups"))
 RESTART_COMMAND = os.environ.get("WAKAAMA_BOOTSTRAP_RESTART_COMMAND", "")
 BOOTSTRAP_SERVICE = os.environ.get("WAKAAMA_BOOTSTRAP_SERVICE", "")
 SERVER_SERVICE = os.environ.get("WAKAAMA_SERVER_SERVICE", "")
@@ -29,11 +31,21 @@ BOOTSTRAP_LOG = Path(os.environ.get("WAKAAMA_BOOTSTRAP_LOG", DEFAULT_LOG_DIR / "
 SERVER_LOG = Path(os.environ.get("WAKAAMA_SERVER_LOG", DEFAULT_LOG_DIR / "server.log"))
 CONTROL_SOCKET = os.environ.get("WAKAAMA_CONTROL_SOCKET", "/tmp/lwm2mserver-control.sock")
 DFOTA_FIRMWARE_DIR = Path(os.environ.get("WAKAAMA_DFOTA_FIRMWARE_DIR", PROJECT_DIR / "run" / "server" / "dfota_fw"))
+RUNTIME_MODE = os.environ.get("WAKAAMA_RUNTIME_MODE", "external").lower()
+BOOTSTRAP_PORT = int(os.environ.get("WAKAAMA_BOOTSTRAP_PORT", "22101"))
+LWM2M_PORT = int(os.environ.get("WAKAAMA_LWM2M_PORT", "22102"))
+BOOTSTRAP_BINARY = os.environ.get("WAKAAMA_BOOTSTRAP_BINARY", str(PROJECT_DIR / "build" / "bootstrap_server" / "bootstrap_server"))
+LWM2M_SERVER_BINARY = os.environ.get("WAKAAMA_LWM2M_SERVER_BINARY", str(PROJECT_DIR / "build" / "server" / "lwm2mserver"))
+DFOTA_HOST = os.environ.get("WAKAAMA_DFOTA_HOST", "")
+DFOTA_URI_PREFIX = os.environ.get("WAKAAMA_DFOTA_URI_PREFIX", "/dfota_fw")
+COMMERCIAL_SERVER_MODE = os.environ.get("WAKAAMA_COMMERCIAL_SERVER_MODE", "1") == "1"
 MAX_FIRMWARE_BYTES = 64 * 1024 * 1024
 ALLOWED_FIRMWARE_SUFFIXES = (".bin", ".img", ".hex")
 MAX_LOG_BYTES = 48 * 1024
 LISTEN_HOST = os.environ.get("WAKAAMA_DASHBOARD_HOST", "127.0.0.1")
 LISTEN_PORT = int(os.environ.get("WAKAAMA_DASHBOARD_PORT", "8080"))
+MANAGED_PROCESSES = {}
+MANAGED_PROCESS_LOCK = threading.Lock()
 
 
 def read_log(path):
@@ -449,6 +461,8 @@ def write_bootstrap_ini(contents):
 
 
 def restart_bootstrap_server():
+    if RUNTIME_MODE == "managed":
+        return control_managed_service("bootstrap", "restart")
     if BOOTSTRAP_SERVICE:
         if not re.fullmatch(r"[A-Za-z0-9_.@-]+\.service", BOOTSTRAP_SERVICE):
             raise ValueError("WAKAAMA_BOOTSTRAP_SERVICE must be a systemd .service unit name")
@@ -477,6 +491,8 @@ def managed_service(target):
 
 
 def control_service(target, action):
+    if RUNTIME_MODE == "managed":
+        return control_managed_service(target, action)
     if action not in ("start", "stop", "restart"):
         raise ValueError("Unsupported service action")
     service_name = managed_service(target)
@@ -485,6 +501,95 @@ def control_service(target, action):
     if result.returncode != 0:
         raise ValueError("{} failed (exit {}): {}".format(action.capitalize(), result.returncode, result.stdout[-2000:]))
     return {"target": target, "action": action, "service": service_name, "active": systemd_service_active(service_name)}
+
+
+def managed_command(target):
+    if target == "bootstrap":
+        return [BOOTSTRAP_BINARY, "-4", "-l", str(BOOTSTRAP_PORT), "-f", str(BOOTSTRAP_INI)]
+    if target == "server":
+        command = [LWM2M_SERVER_BINARY, "-4"]
+        if COMMERCIAL_SERVER_MODE:
+            command.append("-C")
+        command.extend(["-l", str(LWM2M_PORT), "-p", CONTROL_SOCKET,
+                        "-F", str(DFOTA_FIRMWARE_DIR), "-u", DFOTA_URI_PREFIX])
+        if DFOTA_HOST:
+            command.extend(["-H", DFOTA_HOST])
+        return command
+    raise ValueError("Unsupported managed service")
+
+
+def managed_log_path(target):
+    return BOOTSTRAP_LOG if target == "bootstrap" else SERVER_LOG
+
+
+def start_managed_service(target):
+    command = managed_command(target)
+    executable = Path(command[0])
+    if not executable.is_file() or not os.access(executable, os.X_OK):
+        raise ValueError("Managed {} executable is unavailable: {}".format(target, executable))
+
+    with MANAGED_PROCESS_LOCK:
+        process = MANAGED_PROCESSES.get(target)
+        if process and process.poll() is None:
+            return {"target": target, "action": "start", "active": True, "already_running": True}
+        if process_status(executable.name)["running"]:
+            raise ValueError("{} is already running outside dashboard management".format(target.capitalize()))
+
+        log_path = managed_log_path(target)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        if target == "server":
+            Path(CONTROL_SOCKET).parent.mkdir(parents=True, exist_ok=True)
+            DFOTA_FIRMWARE_DIR.mkdir(parents=True, exist_ok=True)
+        with log_path.open("ab", buffering=0) as log_file:
+            process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=log_file,
+                                       stderr=subprocess.STDOUT, start_new_session=True)
+        MANAGED_PROCESSES[target] = process
+    return {"target": target, "action": "start", "active": True, "pid": process.pid}
+
+
+def stop_managed_service(target):
+    with MANAGED_PROCESS_LOCK:
+        process = MANAGED_PROCESSES.get(target)
+        if process is None or process.poll() is not None:
+            MANAGED_PROCESSES.pop(target, None)
+            return {"target": target, "action": "stop", "active": False, "already_stopped": True}
+        process.send_signal(signal.SIGINT)
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=5)
+    with MANAGED_PROCESS_LOCK:
+        MANAGED_PROCESSES.pop(target, None)
+    return {"target": target, "action": "stop", "active": False}
+
+
+def control_managed_service(target, action):
+    if target not in ("bootstrap", "server") or action not in ("start", "stop", "restart"):
+        raise ValueError("Unsupported managed service action")
+    if action == "restart":
+        stop_managed_service(target)
+        result = start_managed_service(target)
+    elif action == "start":
+        result = start_managed_service(target)
+    else:
+        result = stop_managed_service(target)
+    result["manager"] = "dashboard"
+    return result
+
+
+def stop_all_managed_services():
+    if RUNTIME_MODE != "managed":
+        return
+    for target in ("server", "bootstrap"):
+        try:
+            stop_managed_service(target)
+        except OSError:
+            pass
+
+
+def handle_shutdown_signal(signum, frame):
+    raise KeyboardInterrupt
 
 
 def process_status(process_name):
@@ -509,14 +614,18 @@ def udp_port_open(port):
 
 
 def dashboard_status():
-    bootstrap = {"port": 22101, "listener": udp_port_open(22101), **process_status("bootstrap_server")}
+    bootstrap = {"port": BOOTSTRAP_PORT, "listener": udp_port_open(BOOTSTRAP_PORT), **process_status("bootstrap_server")}
     if BOOTSTRAP_SERVICE:
         bootstrap["service"] = BOOTSTRAP_SERVICE
         bootstrap["service_active"] = systemd_service_active(BOOTSTRAP_SERVICE)
-    server = {"port": 22102, "listener": udp_port_open(22102), **process_status("lwm2mserver")}
+    if RUNTIME_MODE == "managed":
+        bootstrap["manager"] = "dashboard"
+    server = {"port": LWM2M_PORT, "listener": udp_port_open(LWM2M_PORT), **process_status("lwm2mserver")}
     if SERVER_SERVICE:
         server["service"] = SERVER_SERVICE
         server["service_active"] = systemd_service_active(SERVER_SERVICE)
+    if RUNTIME_MODE == "managed":
+        server["manager"] = "dashboard"
     return {
         "bootstrap": bootstrap,
         "server": server,
@@ -631,6 +740,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 def main():
     DEFAULT_LOG_DIR.mkdir(exist_ok=True)
     server = ThreadingHTTPServer((LISTEN_HOST, LISTEN_PORT), DashboardHandler)
+    signal.signal(signal.SIGTERM, handle_shutdown_signal)
     print("Wakaama dashboard: http://{}:{}".format(LISTEN_HOST, LISTEN_PORT))
     print("Bootstrap log: {}".format(BOOTSTRAP_LOG))
     print("Server log: {}".format(SERVER_LOG))
@@ -640,6 +750,7 @@ def main():
         print("\nDashboard stopped.")
     finally:
         server.server_close()
+        stop_all_managed_services()
 
 
 if __name__ == "__main__":
