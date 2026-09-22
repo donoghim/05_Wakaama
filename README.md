@@ -254,6 +254,7 @@ docker compose up -d --build
 ```
 
 자세한 ports, persistent data, 권한, 운영 명령은 [docker/README.md](docker/README.md)를 참고한다.
+다른 서버로 이전하거나 Docker image를 export/import하는 절차는 [설치방법.md](설치방법.md)를 참고한다.
 Docker가 UDP `22101`과 `22102`를 사용 중일 때에는 local console/tmux/systemd server를 동시에 실행하지 않는다.
 
 ## Local Dashboard와 systemd 운영

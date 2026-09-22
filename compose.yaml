@@ -10,12 +10,13 @@ services:
       WAKAAMA_DFOTA_HOST: ${DFOTA_HOST:-${PUBLIC_ENDPOINT}}
       WAKAAMA_DFOTA_URI_PREFIX: ${DFOTA_URI_PREFIX:-/dfota_fw}
       WAKAAMA_COMMERCIAL_SERVER_MODE: ${WAKAAMA_COMMERCIAL_SERVER_MODE:-1}
+      WAKAAMA_DASHBOARD_HOST: "0.0.0.0"
       PUID: ${PUID:-1001}
       PGID: ${PGID:-1001}
     ports:
-      - "${DASHBOARD_BIND_ADDRESS:-127.0.0.1}:${DASHBOARD_PORT:-8080}:8080/tcp"
-      - "${BOOTSTRAP_HOST_PORT:-22101}:22101/udp"
-      - "${LWM2M_HOST_PORT:-22102}:22102/udp"
+      - "0.0.0.0:${DASHBOARD_PORT:-8080}:8080/tcp"
+      - "0.0.0.0:${BOOTSTRAP_HOST_PORT:-22101}:22101/udp"
+      - "0.0.0.0:${LWM2M_HOST_PORT:-22102}:22102/udp"
     volumes:
       - ./docker-data:/data
     restart: unless-stopped
