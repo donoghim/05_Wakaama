@@ -15,11 +15,8 @@ if ! docker compose version >/dev/null 2>&1; then
 fi
 
 if [[ ! -f .env ]]; then
-    cp .env.example .env
-    echo "Created .env from .env.example."
-    echo "Set PUBLIC_ENDPOINT to the public IP address or FQDN reachable by devices."
-    echo "Review .env, then run ./start_docker.sh again."
-    exit 0
+    echo ".env was not found. Copy deployment .env into this directory first." >&2
+    exit 1
 fi
 
 if grep -q '^PUBLIC_ENDPOINT=lwm2m\.example\.com$' .env; then
@@ -28,13 +25,19 @@ if grep -q '^PUBLIC_ENDPOINT=lwm2m\.example\.com$' .env; then
     exit 1
 fi
 
-echo "----- start Wakaama Docker runtime"
-docker compose up -d --build
+if ! docker image inspect wakaama-dashboard:local >/dev/null 2>&1; then
+    echo "Docker image was not found: wakaama-dashboard:local" >&2
+    echo "Load it first: docker load < wakaama-dashboard-local.tar.gz" >&2
+    exit 1
+fi
+
+echo "----- start Wakaama Docker runtime from existing image"
+docker compose up -d --no-build
 
 echo
 echo "----- Docker runtime status"
 docker compose ps
 echo
 echo "----- dashboard"
-echo "Open the dashboard at the address configured by DASHBOARD_BIND_ADDRESS and DASHBOARD_PORT in .env."
+echo "Open the dashboard at http://<target-server-ip>:${DASHBOARD_PORT:-8080}"
 echo "Use the dashboard Start buttons to start Bootstrap Server and LwM2M Server."
