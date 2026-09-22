@@ -738,7 +738,8 @@ class DashboardHandler(SimpleHTTPRequestHandler):
 
 
 def main():
-    DEFAULT_LOG_DIR.mkdir(exist_ok=True)
+    BOOTSTRAP_LOG.parent.mkdir(parents=True, exist_ok=True)
+    SERVER_LOG.parent.mkdir(parents=True, exist_ok=True)
     server = ThreadingHTTPServer((LISTEN_HOST, LISTEN_PORT), DashboardHandler)
     signal.signal(signal.SIGTERM, handle_shutdown_signal)
     print("Wakaama dashboard: http://{}:{}".format(LISTEN_HOST, LISTEN_PORT))
